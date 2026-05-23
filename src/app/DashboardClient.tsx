@@ -93,7 +93,10 @@ export default function DashboardClient() {
         )}
 
         {/* ── Band 5: KPI Pulse Strip ── */}
-        <section className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
+        <div className="section-title flex items-center justify-between">
+          <span>פעימה תפעולית · 24 שעות אחרונות</span>
+        </div>
+        <section className="-mt-3 grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
           <KpiCard
             index={0}
             label="פניות פתוחות"
@@ -188,17 +191,23 @@ export default function DashboardClient() {
         </section>
 
         {/* ── Band 6: Network heatmap ── */}
-        {data && <NetworkHeatmap branches={data.branchHealth} />}
+        <div className="section-title">תצוגת רשת · כל הסניפים</div>
+        <div className="-mt-3">
+          {data && <NetworkHeatmap branches={data.branchHealth} />}
+        </div>
 
         {/* ── Band 7: SLA + Activity ── */}
+        <div className="section-title">תור עדיפויות · אירועים חיים</div>
         {data && (
-          <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <section className="-mt-3 grid grid-cols-1 gap-4 lg:grid-cols-2">
             <SLAAlerts alerts={data.slaAlerts} />
             <ActivityFeed events={data.activity} />
           </section>
         )}
 
         {/* ── Band 8: Charts grid ── */}
+        <div className="section-title">ניתוח · 30 ימים</div>
+        <div className="-mt-3" />
         <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <ChartCard
             index={0}

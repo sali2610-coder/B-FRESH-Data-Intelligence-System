@@ -25,7 +25,7 @@ export function HeroSummary({
       initial={{ opacity: 0, y: -16, scale: 0.99 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={SPRING_SMOOTH}
-      className="relative overflow-hidden rounded-[28px] border border-white/30 bg-gradient-to-bl from-bfresh-blue via-[color:oklch(0.58_0.17_220)] to-bfresh-fresh-green p-6 text-white shadow-[0_24px_80px_-12px_oklch(0.55_0.18_235/0.45)] md:p-8 lg:p-10"
+      className="relative overflow-hidden rounded-3xl border border-white/30 bg-gradient-to-bl from-bfresh-blue via-[color:oklch(0.58_0.17_220)] to-bfresh-fresh-green p-5 text-white shadow-[0_18px_60px_-14px_oklch(0.55_0.18_235/0.45)] md:rounded-[28px] md:p-8 lg:p-10"
     >
       {/* Layered glow blobs */}
       <motion.span
@@ -70,13 +70,13 @@ export function HeroSummary({
           </div>
 
           <div>
-            <h1 className="text-3xl font-black leading-[1.1] tracking-tight md:text-4xl lg:text-[2.7rem]">
+            <h1 className="text-2xl font-black leading-[1.1] tracking-tight md:text-4xl lg:text-[2.7rem]">
               מרכז הבקרה של{" "}
               <span className="bg-gradient-to-l from-white to-white/70 bg-clip-text text-transparent">
                 B-FRESH
               </span>
             </h1>
-            <p className="mt-2 max-w-xl text-sm text-white/85 md:text-[15px]">
+            <p className="mt-2 max-w-xl text-[13px] text-white/85 md:text-[15px]">
               תמונת מצב חיה של ביצועי הרשת, סניפים, עובדים ועמידה ביעדי שירות —
               מתעדכן בזמן אמת.
             </p>

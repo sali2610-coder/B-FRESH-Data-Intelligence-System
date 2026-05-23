@@ -71,6 +71,10 @@ function CopilotInner({ insights }: { insights: AIInsight[] }) {
       (IMP_RANK[b.importance ?? "low"] ?? 9),
   );
 
+  // First high-importance insight becomes "Action of the Day"
+  const featured = sorted.find((s) => s.importance === "high") ?? sorted[0];
+  const rest = sorted.filter((s) => s.id !== featured?.id);
+
   return (
     <div className="premium-card flex h-full flex-col overflow-hidden p-0">
       <header className="border-border/50 flex items-center justify-between border-b p-4">
@@ -88,7 +92,7 @@ function CopilotInner({ insights }: { insights: AIInsight[] }) {
           <div>
             <h2 className="text-sm font-black tracking-tight">AI Copilot</h2>
             <p className="text-muted-foreground text-[11px]">
-              מסקנות ופעולות מומלצות
+              מודיעין תפעולי בזמן אמת
             </p>
           </div>
         </div>
@@ -102,23 +106,39 @@ function CopilotInner({ insights }: { insights: AIInsight[] }) {
       </header>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="flex flex-col gap-3 p-4">
-          {sorted.map((ins, i) => (
-            <CopilotInsight insight={ins} index={i} key={ins.id} />
+        {featured && (
+          <div className="border-border/50 border-b p-4">
+            <div className="text-muted-foreground mb-2 text-[10px] font-black uppercase tracking-wider">
+              פעולת היום
+            </div>
+            <CopilotInsight insight={featured} index={0} featured />
+          </div>
+        )}
+        <div className="flex flex-col gap-2.5 p-4">
+          {rest.length > 0 && (
+            <div className="text-muted-foreground text-[10px] font-black uppercase tracking-wider">
+              תובנות נוספות
+            </div>
+          )}
+          {rest.map((ins, i) => (
+            <CopilotInsight insight={ins} index={i + 1} key={ins.id} />
           ))}
         </div>
       </div>
 
       <div className="border-border/50 flex items-center justify-between gap-2 border-t bg-muted/30 p-3 text-[11px]">
-        <span className="text-muted-foreground font-medium">
-          מנוע חוקים + סטטיסטיקה
+        <span className="text-muted-foreground inline-flex items-center gap-1.5 font-medium">
+          <span className="relative inline-flex size-1.5 rounded-full bg-emerald-500">
+            <span className="absolute inset-0 animate-ping rounded-full bg-emerald-500 opacity-75" />
+          </span>
+          חוקים + סטטיסטיקה · {sorted.length} פעילות
         </span>
         <Button
           variant="ghost"
           size="sm"
           className="h-7 gap-1 rounded-lg text-[11px]"
         >
-          כל התובנות
+          הכל
           <ArrowLeft className="size-3" />
         </Button>
       </div>
@@ -129,11 +149,13 @@ function CopilotInner({ insights }: { insights: AIInsight[] }) {
 function CopilotInsight({
   insight: ins,
   index,
+  featured = false,
 }: {
   insight: AIInsight;
   index: number;
+  featured?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(featured);
   const meta = KIND_META[ins.kind];
   const Icon = meta.icon;
   const confidence = Math.round((ins.confidence ?? 0.85) * 100);
@@ -145,8 +167,10 @@ function CopilotInsight({
       animate={{ opacity: 1, x: 0 }}
       transition={{ ...SPRING_SMOOTH, delay: index * 0.05 }}
       className={cn(
-        "premium-card relative overflow-hidden p-3",
-        high && "ring-2 ring-rose-500/20",
+        "premium-card relative overflow-hidden",
+        featured ? "p-3.5" : "p-3",
+        high && !featured && "ring-1 ring-rose-500/20",
+        featured && "ring-2 ring-bfresh-blue/20 shadow-md shadow-bfresh-blue/8",
       )}
     >
       <span

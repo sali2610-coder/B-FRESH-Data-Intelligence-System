@@ -66,27 +66,105 @@ export function generateDashboardData(seed = 42): DashboardData {
   const now = new Date();
   const tasks: Task[] = [];
 
-  for (let i = 0; i < 220; i++) {
-    const branch = BRANCHES[Math.floor(rand() * BRANCHES.length)];
+  // ─── Enterprise realism profile ───
+  // Bias one branch to be overloaded (real-world: one branch dragging the network)
+  const OVERLOADED_BRANCH = "b-brs"; // באר שבע — high volume, low SLA
+  const INACTIVE_BRANCH = "b-net";   // נתניה — quiet, suspiciously few new tickets
+  const RECURRING_TITLE = "תקלה במקרר תצוגה"; // recurring equipment failure
+  const RECURRING_BRANCH = OVERLOADED_BRANCH;
+
+  function pickBranch(i: number) {
+    const r = rand();
+    // 32% of tasks go to overloaded branch
+    if (r < 0.32) return BRANCHES.find((b) => b.id === OVERLOADED_BRANCH)!;
+    // 2% to inactive branch (only old tickets — drift below)
+    if (r < 0.34) return BRANCHES.find((b) => b.id === INACTIVE_BRANCH)!;
+    // rest distributed across remaining 4 branches
+    const remaining = BRANCHES.filter(
+      (b) => b.id !== OVERLOADED_BRANCH && b.id !== INACTIVE_BRANCH,
+    );
+    return remaining[i % remaining.length];
+  }
+
+  function pickAge(branchId: string): number {
+    // Inactive branch: only old tasks (>=10 days)
+    if (branchId === INACTIVE_BRANCH) return 10 + Math.floor(rand() * 20);
+    // 25% of normal tasks are recent (last 2 days) — complaint spike
+    if (rand() < 0.25) return Math.floor(rand() * 2);
+    return Math.floor(rand() * 30);
+  }
+
+  for (let i = 0; i < 240; i++) {
+    const branch = pickBranch(i);
     const eligibleEmps = EMPLOYEES.filter((e) => e.branchId === branch.id);
     const assignee =
       eligibleEmps[Math.floor(rand() * eligibleEmps.length)] ?? EMPLOYEES[0];
-    const status = STATUSES[Math.floor(rand() * STATUSES.length)];
+
+    const daysAgo = pickAge(branch.id);
     const createdAt = new Date(
-      now.getTime() - Math.floor(rand() * 30) * 86400000 - Math.floor(rand() * 86400000),
+      now.getTime() - daysAgo * 86400000 - Math.floor(rand() * 86400000),
     );
+    const dow = createdAt.getDay(); // 0=Sun..6=Sat
+
+    // Status distribution skewed by branch health
+    const statusRoll = rand();
+    let status: TaskStatus;
+    if (branch.id === OVERLOADED_BRANCH) {
+      status =
+        statusRoll < 0.45
+          ? "open"
+          : statusRoll < 0.7
+            ? "in_progress"
+            : statusRoll < 0.78
+              ? "blocked"
+              : "done";
+    } else {
+      status =
+        statusRoll < 0.18
+          ? "open"
+          : statusRoll < 0.4
+            ? "in_progress"
+            : statusRoll < 0.48
+              ? "blocked"
+              : "done";
+    }
+
     const dueAt = new Date(createdAt.getTime() + (4 + rand() * 96) * 3600000);
     const resolved = status === "done";
-    const handlingMinutes = resolved ? Math.round(15 + rand() * 600) : undefined;
-    const r = rand();
-    const slaState = r < 0.7 ? "ok" : r < 0.88 ? "at_risk" : "breached";
+    const handlingMinutes = resolved
+      ? Math.round(
+          (branch.id === OVERLOADED_BRANCH ? 60 : 15) + rand() * 600,
+        )
+      : undefined;
+
+    // SLA state: overloaded branch breaches more; weekends (Fri=5, Sat=6) breach more
+    const slaRoll = rand();
+    const breachBoost =
+      (branch.id === OVERLOADED_BRANCH ? 0.18 : 0) +
+      (dow === 5 || dow === 6 ? 0.1 : 0) +
+      // Recent 2-day breach spike
+      (daysAgo <= 1 ? 0.08 : 0);
+    const slaState =
+      slaRoll < 0.62 - breachBoost
+        ? "ok"
+        : slaRoll < 0.82 - breachBoost / 2
+          ? "at_risk"
+          : "breached";
+
+    // Recurring failure: 30% of overloaded branch tasks get the same equipment title
+    const isRecurring =
+      branch.id === RECURRING_BRANCH && rand() < 0.3;
+    const title = isRecurring
+      ? RECURRING_TITLE
+      : TITLES[Math.floor(rand() * TITLES.length)];
+
     const pr = rand();
     const priority =
-      pr < 0.5 ? "medium" : pr < 0.8 ? "high" : pr < 0.95 ? "low" : "critical";
+      pr < 0.45 ? "medium" : pr < 0.78 ? "high" : pr < 0.93 ? "low" : "critical";
 
     tasks.push({
       id: `t-${1000 + i}`,
-      title: TITLES[Math.floor(rand() * TITLES.length)],
+      title,
       status,
       priority,
       slaState,
@@ -130,14 +208,20 @@ export function generateDashboardData(seed = 42): DashboardData {
   const slaCompliance: { date: string; value: number }[] = [];
   for (let d = 29; d >= 0; d--) {
     const day = new Date(now.getTime() - d * 86400000);
+    const dow = day.getDay();
     const key = day.toISOString().slice(0, 10);
     const dayTasks = tasks.filter((t) => t.createdAt.slice(0, 10) === key);
+    // Weekend anomaly: Fri/Sat see ~12% fewer tickets but lower SLA compliance
+    const weekendPenalty = dow === 5 || dow === 6 ? -6 : 0;
     tasksOverTime.push({ date: key, value: dayTasks.length });
     const okCount = dayTasks.filter((t) => t.slaState === "ok").length;
     slaCompliance.push({
       date: key,
       value: dayTasks.length
-        ? Math.round((okCount / dayTasks.length) * 1000) / 10
+        ? Math.max(
+            55,
+            Math.round((okCount / dayTasks.length) * 1000) / 10 + weekendPenalty,
+          )
         : 90 + Math.round(rand() * 8),
     });
   }

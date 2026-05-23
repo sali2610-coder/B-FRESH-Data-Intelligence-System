@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Sidebar } from "./Sidebar";
 import { TopHeader } from "./TopHeader";
+import { BottomNav } from "./BottomNav";
 import { DensityRoot } from "./DensityRoot";
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -17,6 +18,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             {children}
           </main>
         </div>
+        <BottomNav />
       </div>
     </DensityRoot>
   );

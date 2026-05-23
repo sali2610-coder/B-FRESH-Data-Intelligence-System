@@ -136,36 +136,42 @@ export default function BranchProfileClient({
     <div className="flex flex-col gap-[var(--density-section-gap,1.5rem)]">
       <BranchHero profile={data} />
 
-      {/* Sticky tab bar */}
+      {/* Sticky tab bar — full bleed on mobile */}
       <div className="sticky top-16 z-20 -mx-4 px-4 md:-mx-6 md:px-6 lg:-mx-8 lg:px-8">
-        <div className="premium-card flex gap-1 overflow-x-auto p-1.5">
-          {TABS.map((t) => {
-            const Icon = t.icon;
-            const active = tab === t.id;
-            return (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setTab(t.id)}
-                className={cn(
-                  "relative inline-flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-[13px] font-bold transition-colors",
-                  active
-                    ? "text-white"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent/40",
-                )}
-              >
-                {active && (
-                  <motion.span
-                    layoutId="branch-tab-active"
-                    className="from-bfresh-blue to-bfresh-fresh-green absolute inset-0 -z-10 rounded-xl bg-gradient-to-l shadow-md"
-                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                  />
-                )}
-                <Icon className="size-3.5" />
-                {t.label}
-              </button>
-            );
-          })}
+        <div className="bg-background/70 supports-[backdrop-filter]:bg-background/55 border-border/40 -mx-4 border-b px-4 py-2 backdrop-blur-xl md:rounded-2xl md:border md:px-2 md:py-1.5 md:premium-card">
+          <div className="flex gap-1 overflow-x-auto scrollbar-none">
+            {TABS.map((t) => {
+              const Icon = t.icon;
+              const active = tab === t.id;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setTab(t.id)}
+                  className={cn(
+                    "relative inline-flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-[13px] font-bold transition-colors",
+                    active
+                      ? "text-white"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent/40",
+                  )}
+                >
+                  {active && (
+                    <motion.span
+                      layoutId="branch-tab-active"
+                      className="from-bfresh-blue to-bfresh-fresh-green absolute inset-0 -z-10 rounded-xl bg-gradient-to-l shadow-md"
+                      transition={{
+                        type: "spring",
+                        stiffness: 350,
+                        damping: 30,
+                      }}
+                    />
+                  )}
+                  <Icon className="size-3.5" />
+                  {t.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 

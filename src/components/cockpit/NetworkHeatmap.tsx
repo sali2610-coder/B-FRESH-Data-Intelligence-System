@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Activity, ArrowLeft, MapPin } from "lucide-react";
+import { ArrowLeft, MapPin } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -150,21 +150,21 @@ export function NetworkHeatmap({
                     </div>
                   </div>
                   {b.movement !== 0 && (
-                    <div className="text-muted-foreground relative mt-1 text-[10px]">
-                      תזוזה בדירוג:{" "}
+                    <div className="text-muted-foreground relative mt-1.5 flex items-center gap-1 text-[10px]">
                       <span
                         className={cn(
-                          "font-bold",
-                          b.movement > 0 ? "text-emerald-700" : "text-rose-700",
+                          "inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 font-black tabular-nums",
+                          b.movement > 0
+                            ? "bg-emerald-500/10 text-emerald-700"
+                            : "bg-rose-500/10 text-rose-700",
                         )}
                       >
-                        {b.movement > 0 ? "+" : ""}
-                        {b.movement}
+                        {b.movement > 0 ? "▲" : "▼"} {Math.abs(b.movement)}
                       </span>
+                      <span>בדירוג</span>
                     </div>
                   )}
-                  <Activity className="text-muted-foreground/40 group-hover:text-bfresh-blue absolute end-3 bottom-3 size-3.5 opacity-0 transition-all group-hover:opacity-100" />
-                  <ArrowLeft className="text-muted-foreground/0 group-hover:text-bfresh-blue absolute end-3 bottom-3 size-3.5 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
+                  <ArrowLeft className="text-bfresh-blue absolute end-3 bottom-3 size-3.5 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
                 </Link>
               </motion.div>
             );
