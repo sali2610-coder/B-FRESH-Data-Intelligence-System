@@ -27,24 +27,26 @@ import type { AIInsight } from "@/types/domain";
 const KIND_META = {
   positive: {
     icon: TrendingUp,
-    chip: "bg-emerald-500/12 text-emerald-700 border-emerald-500/30",
-    iconBg: "bg-gradient-to-br from-emerald-500 to-bfresh-fresh-green",
-    bar: "from-emerald-500 to-bfresh-fresh-green",
-    confidence: "bg-emerald-500",
+    chip:
+      "bg-bfresh-fresh-green/12 text-tone-success border-bfresh-fresh-green/30",
+    iconBg:
+      "bg-gradient-to-br from-bfresh-fresh-green to-bfresh-light-blue",
+    bar: "from-bfresh-fresh-green to-bfresh-light-blue",
+    confidence: "bg-bfresh-fresh-green",
   },
   warning: {
     icon: AlertTriangle,
-    chip: "bg-amber-500/12 text-amber-700 border-amber-500/30",
-    iconBg: "bg-gradient-to-br from-amber-500 to-orange-500",
-    bar: "from-amber-500 to-orange-500",
-    confidence: "bg-amber-500",
+    chip: "bg-tone-warm/12 text-tone-warm border-tone-warm/30",
+    iconBg: "bg-gradient-to-br from-tone-warm to-tone-sla",
+    bar: "from-tone-warm to-tone-sla",
+    confidence: "bg-tone-warm",
   },
   info: {
     icon: Info,
-    chip: "bg-bfresh-blue/12 text-bfresh-blue border-bfresh-blue/30",
-    iconBg: "bg-gradient-to-br from-bfresh-blue to-bfresh-light-blue",
-    bar: "from-bfresh-blue to-bfresh-light-blue",
-    confidence: "bg-bfresh-blue",
+    chip: "bg-tone-ai/12 text-tone-ai border-tone-ai/30",
+    iconBg: "bg-gradient-to-br from-tone-ai to-bfresh-light-blue",
+    bar: "from-tone-ai to-bfresh-light-blue",
+    confidence: "bg-tone-ai",
   },
 } as const;
 
@@ -128,8 +130,8 @@ function CopilotInner({ insights }: { insights: AIInsight[] }) {
 
       <div className="border-border/50 flex items-center justify-between gap-2 border-t bg-muted/30 p-3 text-[11px]">
         <span className="text-muted-foreground inline-flex items-center gap-1.5 font-medium">
-          <span className="relative inline-flex size-1.5 rounded-full bg-emerald-500">
-            <span className="absolute inset-0 animate-ping rounded-full bg-emerald-500 opacity-75" />
+          <span className="relative inline-flex size-1.5 rounded-full bg-bfresh-fresh-green">
+            <span className="absolute inset-0 animate-ping rounded-full bg-bfresh-fresh-green opacity-75" />
           </span>
           חוקים + סטטיסטיקה · {sorted.length} פעילות
         </span>
@@ -169,7 +171,7 @@ function CopilotInsight({
       className={cn(
         "premium-card relative overflow-hidden",
         featured ? "p-3.5" : "p-3",
-        high && !featured && "ring-1 ring-rose-500/20",
+        high && !featured && "ring-1 ring-bfresh-coral/20",
         featured && "ring-2 ring-bfresh-blue/20 shadow-md shadow-bfresh-blue/8",
       )}
     >
@@ -183,7 +185,7 @@ function CopilotInsight({
         <motion.span
           animate={{ opacity: [0.3, 0.7, 0.3] }}
           transition={{ duration: 2.4, repeat: Infinity }}
-          className="pointer-events-none absolute -inset-px rounded-[var(--radius-lg)] bg-rose-500/4"
+          className="pointer-events-none absolute -inset-px rounded-[var(--radius-lg)] bg-bfresh-coral/4"
         />
       )}
 
@@ -201,7 +203,7 @@ function CopilotInsight({
             {high && (
               <Badge
                 variant="outline"
-                className="rounded-full border-rose-500/30 bg-rose-500/10 text-[10px] font-black uppercase tracking-wider text-rose-700"
+                className="rounded-full border-bfresh-coral/30 bg-bfresh-coral/10 text-[10px] font-black uppercase tracking-wider text-bfresh-coral"
               >
                 עדיפות גבוהה
               </Badge>
@@ -290,7 +292,7 @@ function CopilotFab({ insights }: { insights: AIInsight[] }) {
         <Sparkles className="size-4" />
         Copilot
         {high > 0 && (
-          <span className="ms-1 grid h-5 min-w-5 place-items-center rounded-full bg-white px-1 text-[11px] font-black text-rose-600">
+          <span className="ms-1 grid h-5 min-w-5 place-items-center rounded-full bg-white px-1 text-[11px] font-black text-bfresh-coral">
             {high}
           </span>
         )}

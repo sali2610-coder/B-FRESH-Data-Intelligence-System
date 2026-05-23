@@ -136,9 +136,9 @@ export function TopHeader() {
               <DensityToggle />
             </div>
 
-            <div className="hidden items-center gap-1.5 rounded-full bg-gradient-to-l from-emerald-500/10 to-bfresh-fresh-green/10 px-3 py-1.5 text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-500/20 md:flex">
-              <span className="relative inline-flex size-2 rounded-full bg-emerald-500">
-                <span className="absolute inset-0 animate-ping rounded-full bg-emerald-500 opacity-75" />
+            <div className="from-bfresh-fresh-green/10 to-bfresh-light-blue/10 text-tone-success ring-bfresh-fresh-green/25 hidden items-center gap-1.5 rounded-full bg-gradient-to-l px-3 py-1.5 text-[11px] font-bold ring-1 md:flex">
+              <span className="bg-bfresh-fresh-green relative inline-flex size-2 rounded-full">
+                <span className="bg-bfresh-fresh-green absolute inset-0 animate-ping rounded-full opacity-75" />
               </span>
               <Wifi className="size-3" />
               מחובר · דמה
@@ -153,7 +153,7 @@ export function TopHeader() {
               className="relative rounded-xl"
             >
               <Bell className="size-4" />
-              <span className="absolute right-2 top-2 size-2 rounded-full bg-rose-500 ring-2 ring-background" />
+              <span className="absolute right-2 top-2 size-2 rounded-full bg-bfresh-coral ring-2 ring-background" />
             </Button>
 
             <Button

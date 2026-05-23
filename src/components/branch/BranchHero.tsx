@@ -39,12 +39,12 @@ export function BranchHero({ profile }: { profile: BranchProfile }) {
     health.alerts.recurringIssue && {
       icon: AlertTriangle,
       label: "תקלה חוזרת",
-      tone: "bg-rose-500/15 text-rose-700 border-rose-500/30",
+      tone: "bg-bfresh-coral/15 text-bfresh-coral border-bfresh-coral/30",
     },
     health.alerts.slaRisk && {
       icon: AlertTriangle,
       label: "סיכון SLA",
-      tone: "bg-amber-500/15 text-amber-700 border-amber-500/30",
+      tone: "bg-tone-warm/15 text-tone-warm border-tone-warm/30",
     },
     health.alerts.inspectionOverdue && {
       icon: AlertTriangle,
@@ -54,7 +54,7 @@ export function BranchHero({ profile }: { profile: BranchProfile }) {
     health.alerts.staffingShortage && {
       icon: AlertTriangle,
       label: "חוסר באיוש",
-      tone: "bg-violet-500/15 text-violet-700 border-violet-500/30",
+      tone: "bg-tone-ai/15 text-tone-ai border-tone-ai/30",
     },
   ].filter(Boolean) as { icon: typeof AlertTriangle; label: string; tone: string }[];
 
@@ -166,7 +166,7 @@ export function BranchHero({ profile }: { profile: BranchProfile }) {
           {alerts.length === 0 && (
             <Badge
               variant="outline"
-              className="border-emerald-500/30 bg-emerald-500/10 text-emerald-700 gap-1 rounded-full"
+              className="border-bfresh-fresh-green/30 bg-bfresh-fresh-green/10 text-tone-success gap-1 rounded-full"
             >
               <ShieldCheck className="size-3" />
               ללא התרעות

@@ -69,11 +69,11 @@ export function EmployeesTable({ rows }: { rows: EmployeePerformance[] }) {
                       className={cn(
                         "grid size-8 place-items-center rounded-xl text-xs font-black tabular-nums",
                         i === 0
-                          ? "bg-gradient-to-br from-amber-400 to-amber-600 text-white shadow-md shadow-amber-500/30"
+                          ? "bg-gradient-to-br from-tone-warm to-tone-warm text-white shadow-md shadow-tone-warm/30"
                           : i === 1
                             ? "bg-gradient-to-br from-zinc-300 to-zinc-400 text-white shadow-md shadow-zinc-400/30"
                             : i === 2
-                              ? "bg-gradient-to-br from-orange-400 to-orange-600 text-white shadow-md shadow-orange-500/30"
+                              ? "bg-gradient-to-br from-tone-sla to-tone-sla text-white shadow-md shadow-orange-500/30"
                               : "bg-muted text-muted-foreground",
                       )}
                     >
@@ -139,10 +139,10 @@ export function EmployeesTable({ rows }: { rows: EmployeePerformance[] }) {
                       className={cn(
                         "rounded-full text-[11px] font-bold tabular-nums",
                         r.slaScore >= 85
-                          ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/25"
+                          ? "bg-bfresh-fresh-green/10 text-tone-success border-bfresh-fresh-green/25"
                           : r.slaScore >= 70
-                            ? "bg-amber-500/10 text-amber-700 border-amber-500/25"
-                            : "bg-rose-500/10 text-rose-700 border-rose-500/25",
+                            ? "bg-tone-warm/10 text-tone-warm border-tone-warm/25"
+                            : "bg-bfresh-coral/10 text-bfresh-coral border-bfresh-coral/25",
                       )}
                     >
                       {r.slaScore}%
@@ -153,8 +153,8 @@ export function EmployeesTable({ rows }: { rows: EmployeePerformance[] }) {
                       className={cn(
                         "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-black tabular-nums",
                         r.trend >= 0
-                          ? "bg-emerald-500/10 text-emerald-700"
-                          : "bg-rose-500/10 text-rose-700",
+                          ? "bg-bfresh-fresh-green/10 text-tone-success"
+                          : "bg-bfresh-coral/10 text-bfresh-coral",
                       )}
                     >
                       {r.trend >= 0 ? "▲" : "▼"} {Math.abs(r.trend)}%

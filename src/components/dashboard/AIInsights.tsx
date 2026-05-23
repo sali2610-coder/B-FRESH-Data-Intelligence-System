@@ -22,31 +22,33 @@ const KIND_META = {
   positive: {
     icon: TrendingUp,
     badge: "חיובי",
-    badgeClass: "bg-emerald-500/12 text-emerald-700 border-emerald-500/30",
-    bar: "from-emerald-500 to-bfresh-fresh-green",
-    iconBg: "bg-gradient-to-br from-emerald-500 to-bfresh-fresh-green text-white",
-    glow: "glow-green",
-    confidenceColor: "bg-emerald-500",
+    badgeClass:
+      "bg-bfresh-fresh-green/12 text-tone-success border-bfresh-fresh-green/30",
+    bar: "from-bfresh-fresh-green to-bfresh-light-blue",
+    iconBg:
+      "bg-gradient-to-br from-bfresh-fresh-green to-bfresh-light-blue text-white",
+    glow: "glow-success",
+    confidenceColor: "bg-bfresh-fresh-green",
     action: "צפה בפרטים",
   },
   warning: {
     icon: AlertTriangle,
     badge: "התרעה",
-    badgeClass: "bg-amber-500/12 text-amber-700 border-amber-500/30",
-    bar: "from-amber-500 to-orange-500",
-    iconBg: "bg-gradient-to-br from-amber-500 to-orange-500 text-white",
+    badgeClass: "bg-tone-warm/12 text-tone-warm border-tone-warm/30",
+    bar: "from-tone-warm to-tone-sla",
+    iconBg: "bg-gradient-to-br from-tone-warm to-tone-sla text-white",
     glow: "glow-amber",
-    confidenceColor: "bg-amber-500",
+    confidenceColor: "bg-tone-warm",
     action: "בדוק והגב",
   },
   info: {
     icon: Info,
     badge: "תובנה",
-    badgeClass: "bg-bfresh-blue/12 text-bfresh-blue border-bfresh-blue/30",
-    bar: "from-bfresh-blue to-bfresh-light-blue",
-    iconBg: "bg-gradient-to-br from-bfresh-blue to-bfresh-light-blue text-white",
-    glow: "glow-blue",
-    confidenceColor: "bg-bfresh-blue",
+    badgeClass: "bg-tone-ai/12 text-tone-ai border-tone-ai/30",
+    bar: "from-tone-ai to-bfresh-light-blue",
+    iconBg: "bg-gradient-to-br from-tone-ai to-bfresh-light-blue text-white",
+    glow: "glow-ai",
+    confidenceColor: "bg-tone-ai",
     action: "חקור עוד",
   },
 } as const;
@@ -168,7 +170,7 @@ function InsightCard({
             {ins.importance === "high" && (
               <Badge
                 variant="outline"
-                className="border-rose-500/30 bg-rose-500/10 text-rose-700 rounded-full text-[10px] font-black uppercase tracking-wider"
+                className="border-bfresh-coral/30 bg-bfresh-coral/10 text-bfresh-coral rounded-full text-[10px] font-black uppercase tracking-wider"
               >
                 עדיפות גבוהה
               </Badge>

@@ -14,22 +14,22 @@ const SEV_TONE: Record<
   { bar: string; text: string; chip: string; iconBg: string }
 > = {
   critical: {
-    bar: "from-rose-600 to-rose-500",
-    text: "text-rose-700",
-    chip: "bg-rose-500/15 text-rose-700 border-rose-500/30",
-    iconBg: "bg-gradient-to-br from-rose-500 to-rose-600",
+    bar: "from-bfresh-coral-deep to-bfresh-coral",
+    text: "text-bfresh-coral",
+    chip: "bg-bfresh-coral/15 text-bfresh-coral border-bfresh-coral/30",
+    iconBg: "bg-gradient-to-br from-bfresh-coral to-bfresh-coral-deep",
   },
   high: {
-    bar: "from-orange-500 to-amber-500",
-    text: "text-amber-700",
-    chip: "bg-amber-500/15 text-amber-700 border-amber-500/30",
-    iconBg: "bg-gradient-to-br from-amber-500 to-orange-500",
+    bar: "from-tone-warm to-tone-sla",
+    text: "text-tone-warm",
+    chip: "bg-tone-warm/15 text-tone-warm border-tone-warm/30",
+    iconBg: "bg-gradient-to-br from-tone-warm to-tone-sla",
   },
   medium: {
-    bar: "from-bfresh-blue to-sky-500",
+    bar: "from-bfresh-blue to-bfresh-light-blue",
     text: "text-bfresh-blue",
     chip: "bg-bfresh-blue/12 text-bfresh-blue border-bfresh-blue/30",
-    iconBg: "bg-gradient-to-br from-bfresh-blue to-sky-500",
+    iconBg: "bg-gradient-to-br from-bfresh-blue to-bfresh-light-blue",
   },
 };
 
@@ -55,13 +55,13 @@ export function UrgentAlertsRail({ events }: { events: ActivityEvent[] }) {
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="relative">
-            <div className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-rose-500 to-orange-500 text-white shadow-md shadow-rose-500/30 ring-1 ring-white/30">
+            <div className="from-bfresh-coral to-tone-warm shadow-bfresh-coral/30 grid size-9 place-items-center rounded-xl bg-gradient-to-br text-white shadow-md ring-1 ring-white/30">
               <Siren className="size-4" />
             </div>
             <motion.span
               animate={{ scale: [1, 1.45, 1], opacity: [0.4, 0, 0.4] }}
               transition={{ duration: 2, repeat: Infinity }}
-              className="pointer-events-none absolute inset-0 rounded-xl bg-rose-500/50"
+              className="bg-bfresh-coral/50 pointer-events-none absolute inset-0 rounded-xl"
             />
           </div>
           <div>

@@ -32,32 +32,32 @@ const KIND_META: Record<
   sla_breach: {
     icon: AlertTriangle,
     label: "חריגת SLA",
-    ring: "text-rose-600 bg-rose-500/10 ring-rose-500/20",
+    ring: "text-bfresh-coral bg-bfresh-coral/10 ring-bfresh-coral/20",
   },
   complaint_opened: {
     icon: MessageSquare,
     label: "תלונה",
-    ring: "text-amber-600 bg-amber-500/10 ring-amber-500/20",
+    ring: "text-tone-warm bg-tone-warm/10 ring-tone-warm/20",
   },
   complaint_closed: {
     icon: CheckCircle2,
     label: "תלונה נסגרה",
-    ring: "text-emerald-600 bg-emerald-500/10 ring-emerald-500/20",
+    ring: "text-tone-success bg-bfresh-fresh-green/10 ring-bfresh-fresh-green/20",
   },
   maintenance_call: {
     icon: Wrench,
     label: "אחזקה",
-    ring: "text-violet-600 bg-violet-500/10 ring-violet-500/20",
+    ring: "text-tone-ai bg-tone-ai/10 ring-tone-ai/20",
   },
   technician_delay: {
     icon: Clock,
     label: "טכנאי באיחור",
-    ring: "text-amber-600 bg-amber-500/10 ring-amber-500/20",
+    ring: "text-tone-warm bg-tone-warm/10 ring-tone-warm/20",
   },
   branch_outage: {
     icon: Plug,
     label: "סניף לא מקוון",
-    ring: "text-rose-600 bg-rose-500/10 ring-rose-500/20",
+    ring: "text-bfresh-coral bg-bfresh-coral/10 ring-bfresh-coral/20",
   },
   marketing_launch: {
     icon: Megaphone,
@@ -72,7 +72,7 @@ const KIND_META: Record<
   franchise_lead: {
     icon: UserPlus,
     label: "ליד זכיינות",
-    ring: "text-emerald-600 bg-emerald-500/10 ring-emerald-500/20",
+    ring: "text-tone-success bg-bfresh-fresh-green/10 ring-bfresh-fresh-green/20",
   },
   inspection_completed: {
     icon: ClipboardCheck,
@@ -82,10 +82,10 @@ const KIND_META: Record<
 };
 
 const SEV_DOT: Record<string, string> = {
-  critical: "bg-rose-500",
-  high: "bg-amber-500",
+  critical: "bg-bfresh-coral",
+  high: "bg-tone-warm",
   medium: "bg-bfresh-blue",
-  low: "bg-emerald-500",
+  low: "bg-bfresh-fresh-green",
   info: "bg-zinc-400",
 };
 
@@ -136,10 +136,10 @@ export function ActivityFeed({
         </div>
         <Badge
           variant="outline"
-          className="rounded-full gap-1.5 border-emerald-500/30 bg-emerald-500/8 text-emerald-700"
+          className="rounded-full gap-1.5 border-bfresh-fresh-green/30 bg-bfresh-fresh-green/8 text-tone-success"
         >
-          <span className="relative inline-flex size-1.5 rounded-full bg-emerald-500">
-            <span className="absolute inset-0 animate-ping rounded-full bg-emerald-500 opacity-75" />
+          <span className="relative inline-flex size-1.5 rounded-full bg-bfresh-fresh-green">
+            <span className="absolute inset-0 animate-ping rounded-full bg-bfresh-fresh-green opacity-75" />
           </span>
           חי
         </Badge>

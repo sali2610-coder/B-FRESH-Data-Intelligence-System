@@ -38,10 +38,10 @@ const KIND_ICON: Record<string, LucideIcon> = {
 };
 
 const SEV_RING: Record<string, string> = {
-  critical: "bg-rose-500/15 text-rose-700 ring-rose-500/30",
-  high: "bg-amber-500/15 text-amber-700 ring-amber-500/30",
+  critical: "bg-bfresh-coral/15 text-bfresh-coral ring-bfresh-coral/30",
+  high: "bg-tone-warm/15 text-tone-warm ring-tone-warm/30",
   medium: "bg-bfresh-blue/12 text-bfresh-blue ring-bfresh-blue/30",
-  low: "bg-emerald-500/15 text-emerald-700 ring-emerald-500/30",
+  low: "bg-bfresh-fresh-green/15 text-tone-success ring-bfresh-fresh-green/30",
   info: "bg-zinc-400/15 text-zinc-700 ring-zinc-400/30",
 };
 

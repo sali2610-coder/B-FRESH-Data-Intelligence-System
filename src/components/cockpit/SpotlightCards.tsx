@@ -55,12 +55,12 @@ function NetworkScoreCard({
 }) {
   const tone =
     score >= 85
-      ? "from-emerald-500 to-bfresh-fresh-green"
+      ? "from-bfresh-fresh-green to-bfresh-light-blue"
       : score >= 70
-        ? "from-bfresh-blue to-sky-500"
+        ? "from-bfresh-blue to-bfresh-light-blue"
         : score >= 60
-          ? "from-amber-500 to-orange-500"
-          : "from-rose-500 to-rose-600";
+          ? "from-tone-warm to-tone-sla"
+          : "from-bfresh-coral to-bfresh-coral-deep";
 
   return (
     <motion.div
@@ -94,8 +94,8 @@ function NetworkScoreCard({
             className={cn(
               "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-black tabular-nums",
               trend >= 0
-                ? "bg-emerald-500/12 text-emerald-700"
-                : "bg-rose-500/12 text-rose-700",
+                ? "bg-bfresh-fresh-green/12 text-tone-success"
+                : "bg-bfresh-coral/12 text-bfresh-coral",
             )}
           >
             {trend >= 0 ? "▲" : "▼"} {Math.abs(trend)}% מהשבוע הקודם
@@ -148,15 +148,15 @@ function BranchSpotlight({
         href={`/branches/${branch.branchId}`}
         className={cn(
           "premium-card group relative block overflow-hidden p-5",
-          kind === "top" ? "glow-green" : "glow-rose",
+          kind === "top" ? "glow-success" : "glow-critical",
         )}
       >
         <span
           className={cn(
             "pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-l",
             kind === "top"
-              ? "from-emerald-500 to-bfresh-fresh-green"
-              : "from-rose-500 to-rose-600",
+              ? "from-bfresh-fresh-green to-bfresh-light-blue"
+              : "from-bfresh-coral to-bfresh-coral-deep",
           )}
         />
         <div className="relative flex items-start justify-between gap-3">
@@ -175,8 +175,8 @@ function BranchSpotlight({
             className={cn(
               "grid size-12 shrink-0 place-items-center rounded-2xl text-white shadow-md ring-1 ring-white/30",
               kind === "top"
-                ? "bg-gradient-to-br from-emerald-500 to-bfresh-fresh-green"
-                : "bg-gradient-to-br from-rose-500 to-rose-600",
+                ? "bg-gradient-to-br from-bfresh-fresh-green to-bfresh-light-blue"
+                : "bg-gradient-to-br from-bfresh-coral to-bfresh-coral-deep",
             )}
           >
             <Icon className="size-5" />
@@ -192,7 +192,7 @@ function BranchSpotlight({
               <span
                 className={cn(
                   "inline-flex items-center gap-0.5 text-[11px] font-black tabular-nums",
-                  branch.trend >= 0 ? "text-emerald-700" : "text-rose-700",
+                  branch.trend >= 0 ? "text-tone-success" : "text-bfresh-coral",
                 )}
               >
                 {branch.trend >= 0 ? "▲" : "▼"} {Math.abs(branch.trend)}%
@@ -214,7 +214,7 @@ function BranchSpotlight({
         </div>
 
         {kind === "bottom" && riser && riser.movement > 0 && (
-          <div className="relative mt-3 rounded-lg bg-emerald-500/8 p-2 text-[11px] leading-snug text-emerald-800">
+          <div className="relative mt-3 rounded-lg bg-bfresh-fresh-green/8 p-2 text-[11px] leading-snug text-tone-success">
             <span className="font-black">{riser.branchName}</span> זינק{" "}
             <span className="font-black">+{riser.movement}</span> מקומות בדירוג —
             ניתן להעתיק נהלים.

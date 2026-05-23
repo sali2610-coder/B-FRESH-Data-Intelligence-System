@@ -30,6 +30,8 @@ export type KpiCardProps = {
   index?: number;
 };
 
+// Brand emotional tones — every accent ties to the B-FRESH palette.
+// blue = Network · green = Success · amber = Warm · rose = Critical/Watermelon · violet = AI · cyan = Sky
 const accent: Record<
   KpiAccent,
   {
@@ -43,51 +45,51 @@ const accent: Record<
 > = {
   blue: {
     bar: "from-bfresh-blue to-bfresh-light-blue",
-    iconBg: "bg-gradient-to-br from-bfresh-blue/15 to-bfresh-blue/5",
+    iconBg: "bg-gradient-to-br from-bfresh-blue/15 to-bfresh-sky/30",
     iconFg: "text-bfresh-blue",
-    spark: "oklch(0.55 0.18 235)",
-    glowClass: "glow-blue",
-    softTint: "from-bfresh-blue/[0.04] to-transparent",
+    spark: "#12a9e8",
+    glowClass: "glow-network",
+    softTint: "from-bfresh-light-blue/[0.10] to-transparent",
   },
   green: {
-    bar: "from-bfresh-fresh-green to-emerald-400",
-    iconBg: "bg-gradient-to-br from-emerald-500/15 to-emerald-500/5",
-    iconFg: "text-emerald-600",
-    spark: "oklch(0.7 0.18 155)",
-    glowClass: "glow-green",
-    softTint: "from-emerald-500/[0.04] to-transparent",
+    bar: "from-bfresh-fresh-green to-bfresh-light-blue",
+    iconBg: "bg-gradient-to-br from-bfresh-fresh-green/15 to-bfresh-fresh-green/5",
+    iconFg: "text-tone-success",
+    spark: "#3ed598",
+    glowClass: "glow-success",
+    softTint: "from-bfresh-fresh-green/[0.06] to-transparent",
   },
   amber: {
-    bar: "from-amber-500 to-orange-400",
-    iconBg: "bg-gradient-to-br from-amber-500/15 to-amber-500/5",
-    iconFg: "text-amber-600",
-    spark: "oklch(0.78 0.18 70)",
+    bar: "from-tone-warm to-tone-sla",
+    iconBg: "bg-gradient-to-br from-tone-warm/15 to-tone-warm/5",
+    iconFg: "text-tone-warm",
+    spark: "#ffb454",
     glowClass: "glow-amber",
-    softTint: "from-amber-500/[0.04] to-transparent",
+    softTint: "from-tone-warm/[0.06] to-transparent",
   },
   rose: {
-    bar: "from-rose-500 to-pink-400",
-    iconBg: "bg-gradient-to-br from-rose-500/15 to-rose-500/5",
-    iconFg: "text-rose-600",
-    spark: "oklch(0.65 0.21 25)",
-    glowClass: "glow-rose",
-    softTint: "from-rose-500/[0.04] to-transparent",
+    bar: "from-bfresh-coral to-bfresh-coral-deep",
+    iconBg: "bg-gradient-to-br from-bfresh-coral/15 to-bfresh-coral/5",
+    iconFg: "text-bfresh-coral",
+    spark: "#ff7a6b",
+    glowClass: "glow-critical",
+    softTint: "from-bfresh-coral/[0.08] to-transparent",
   },
   violet: {
-    bar: "from-violet-500 to-purple-400",
-    iconBg: "bg-gradient-to-br from-violet-500/15 to-violet-500/5",
-    iconFg: "text-violet-600",
-    spark: "oklch(0.62 0.2 300)",
-    glowClass: "glow-violet",
-    softTint: "from-violet-500/[0.04] to-transparent",
+    bar: "from-tone-ai to-bfresh-light-blue",
+    iconBg: "bg-gradient-to-br from-tone-ai/15 to-tone-ai/5",
+    iconFg: "text-tone-ai",
+    spark: "#7c6cff",
+    glowClass: "glow-ai",
+    softTint: "from-tone-ai/[0.06] to-transparent",
   },
   cyan: {
-    bar: "from-cyan-500 to-sky-400",
-    iconBg: "bg-gradient-to-br from-cyan-500/15 to-cyan-500/5",
-    iconFg: "text-cyan-600",
-    spark: "oklch(0.7 0.16 220)",
+    bar: "from-bfresh-light-blue to-bfresh-blue",
+    iconBg: "bg-gradient-to-br from-bfresh-light-blue/20 to-bfresh-sky/30",
+    iconFg: "text-bfresh-blue",
+    spark: "#6fd3ff",
     glowClass: "glow-cyan",
-    softTint: "from-cyan-500/[0.04] to-transparent",
+    softTint: "from-bfresh-sky/[0.16] to-transparent",
   },
 };
 
@@ -202,8 +204,8 @@ export function KpiCard({
               className={cn(
                 "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-black tabular-nums",
                 trend.positive
-                  ? "bg-emerald-500/12 text-emerald-700 ring-1 ring-emerald-500/15"
-                  : "bg-rose-500/12 text-rose-700 ring-1 ring-rose-500/15",
+                  ? "bg-bfresh-fresh-green/12 text-tone-success ring-1 ring-bfresh-fresh-green/15"
+                  : "bg-bfresh-coral/12 text-bfresh-coral ring-1 ring-bfresh-coral/15",
               )}
             >
               {trend.positive ? (
@@ -219,9 +221,9 @@ export function KpiCard({
               className={cn(
                 "inline-flex rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide",
                 badge.tone === "good"
-                  ? "bg-emerald-500/12 text-emerald-700 ring-1 ring-emerald-500/15"
+                  ? "bg-bfresh-fresh-green/12 text-tone-success ring-1 ring-bfresh-fresh-green/15"
                   : badge.tone === "bad"
-                    ? "bg-rose-500/12 text-rose-700 ring-1 ring-rose-500/15"
+                    ? "bg-bfresh-coral/12 text-bfresh-coral ring-1 ring-bfresh-coral/15"
                     : "bg-muted text-muted-foreground",
               )}
             >

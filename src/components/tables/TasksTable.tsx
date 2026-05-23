@@ -26,9 +26,9 @@ const STATUS_LABEL: Record<TaskStatus, string> = {
 
 const STATUS_CLASS: Record<TaskStatus, string> = {
   open: "bg-blue-500/10 text-blue-700 border-blue-500/25",
-  in_progress: "bg-amber-500/10 text-amber-700 border-amber-500/25",
-  blocked: "bg-rose-500/10 text-rose-700 border-rose-500/25",
-  done: "bg-emerald-500/10 text-emerald-700 border-emerald-500/25",
+  in_progress: "bg-tone-warm/10 text-tone-warm border-tone-warm/25",
+  blocked: "bg-bfresh-coral/10 text-bfresh-coral border-bfresh-coral/25",
+  done: "bg-bfresh-fresh-green/10 text-tone-success border-bfresh-fresh-green/25",
 };
 
 const SLA_LABEL: Record<SLAState, string> = {
@@ -38,9 +38,9 @@ const SLA_LABEL: Record<SLAState, string> = {
 };
 
 const SLA_CLASS: Record<SLAState, string> = {
-  ok: "bg-emerald-500/10 text-emerald-700 border-emerald-500/25",
-  at_risk: "bg-amber-500/10 text-amber-700 border-amber-500/25",
-  breached: "bg-rose-500/10 text-rose-700 border-rose-500/25",
+  ok: "bg-bfresh-fresh-green/10 text-tone-success border-bfresh-fresh-green/25",
+  at_risk: "bg-tone-warm/10 text-tone-warm border-tone-warm/25",
+  breached: "bg-bfresh-coral/10 text-bfresh-coral border-bfresh-coral/25",
 };
 
 export function TasksTable({

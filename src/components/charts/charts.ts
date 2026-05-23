@@ -5,26 +5,31 @@ import type {
   TimeSeriesPoint,
 } from "@/types/domain";
 
+// B-FRESH brand chart palette
 export const CHART_PALETTE = {
-  blue: "#1e90ff",
-  blueSoft: "rgba(30,144,255,0.18)",
-  green: "#22c55e",
-  greenSoft: "rgba(34,197,94,0.22)",
-  amber: "#f59e0b",
-  violet: "#a855f7",
-  cyan: "#06b6d4",
-  rose: "#ef4444",
-  grid: "#eef2f7",
-  axis: "#94a3b8",
+  blue: "#12a9e8",
+  blueSoft: "rgba(18,169,232,0.18)",
+  blueDeep: "#0a8bc4",
+  sky: "#6fd3ff",
+  skySoft: "#bfefff",
+  green: "#3ed598",
+  greenSoft: "rgba(62,213,152,0.22)",
+  amber: "#ffb454",
+  violet: "#7c6cff",
+  cyan: "#6fd3ff",
+  coral: "#ff7a6b",
+  rose: "#ff7a6b",
+  grid: "#e3f1f9",
+  axis: "#7a9aae",
 };
 
 const SERIES = [
   CHART_PALETTE.blue,
   CHART_PALETTE.green,
-  CHART_PALETTE.amber,
+  CHART_PALETTE.sky,
   CHART_PALETTE.violet,
-  CHART_PALETTE.cyan,
-  CHART_PALETTE.rose,
+  CHART_PALETTE.amber,
+  CHART_PALETTE.coral,
 ];
 
 const STATUS_LABEL: Record<TaskStatus, string> = {
@@ -111,7 +116,7 @@ export function lineOption(series: TimeSeriesPoint[]): EChartsOption {
           focus: "series",
           scale: 1.8,
           itemStyle: {
-            shadowColor: "rgba(30,144,255,0.45)",
+            shadowColor: "rgba(18,169,232,0.45)",
             shadowBlur: 16,
           },
         },
@@ -120,7 +125,7 @@ export function lineOption(series: TimeSeriesPoint[]): EChartsOption {
         lineStyle: {
           width: 3,
           color: CHART_PALETTE.blue,
-          shadowColor: "rgba(30,144,255,0.35)",
+          shadowColor: "rgba(18,169,232,0.35)",
           shadowBlur: 14,
           shadowOffsetY: 4,
         },
@@ -137,9 +142,9 @@ export function lineOption(series: TimeSeriesPoint[]): EChartsOption {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: "rgba(30,144,255,0.32)" },
-              { offset: 0.6, color: "rgba(30,144,255,0.08)" },
-              { offset: 1, color: "rgba(30,144,255,0)" },
+              { offset: 0, color: "rgba(18,169,232,0.32)" },
+              { offset: 0.6, color: "rgba(18,169,232,0.08)" },
+              { offset: 1, color: "rgba(18,169,232,0)" },
             ],
           },
         },
@@ -163,7 +168,7 @@ export function areaOption(series: TimeSeriesPoint[]): EChartsOption {
         return `
           <div style="display:flex;flex-direction:column;gap:2px;text-align:right;direction:rtl">
             <span style="font-size:11px;color:#64748b">${heDateFull(dates[idx])}</span>
-            <span style="font-size:14px;font-weight:800;color:#16a34a">${val}% עמידה</span>
+            <span style="font-size:14px;font-weight:800;color:#0f9b6c">${val}% עמידה</span>
           </div>`;
       },
     },
@@ -199,7 +204,7 @@ export function areaOption(series: TimeSeriesPoint[]): EChartsOption {
         lineStyle: {
           width: 2.5,
           color: CHART_PALETTE.green,
-          shadowColor: "rgba(34,197,94,0.3)",
+          shadowColor: "rgba(62,213,152,0.3)",
           shadowBlur: 10,
           shadowOffsetY: 3,
         },
@@ -211,9 +216,9 @@ export function areaOption(series: TimeSeriesPoint[]): EChartsOption {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: "rgba(34,197,94,0.5)" },
-              { offset: 0.6, color: "rgba(34,197,94,0.12)" },
-              { offset: 1, color: "rgba(34,197,94,0)" },
+              { offset: 0, color: "rgba(62,213,152,0.5)" },
+              { offset: 0.6, color: "rgba(62,213,152,0.12)" },
+              { offset: 1, color: "rgba(62,213,152,0)" },
             ],
           },
         },
@@ -426,7 +431,7 @@ export function branchBarOption(
           show: true,
           position: "right",
           formatter: "{c}%",
-          color: "#475569",
+          color: "#4f7488",
           fontSize: 11,
           fontWeight: 700,
         },

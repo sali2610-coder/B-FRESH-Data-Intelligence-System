@@ -82,26 +82,32 @@ export function NetworkHeatmap({
                   href={`/branches/${b.branchId}`}
                   className={cn(
                     "premium-card group relative block overflow-hidden p-3 transition-shadow",
-                    `glow-${b.status === "excellent" ? "green" : b.status === "stable" ? "blue" : b.status === "attention" ? "amber" : "rose"}`,
+                    b.status === "excellent"
+                      ? "glow-success"
+                      : b.status === "stable"
+                        ? "glow-network"
+                        : b.status === "attention"
+                          ? "glow-amber"
+                          : "glow-critical",
                   )}
                 >
                   <span
                     className={cn(
                       "pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-l",
                       b.status === "excellent"
-                        ? "from-emerald-500 to-bfresh-fresh-green"
+                        ? "from-bfresh-fresh-green to-bfresh-light-blue"
                         : b.status === "stable"
-                          ? "from-bfresh-blue to-sky-400"
+                          ? "from-bfresh-blue to-bfresh-light-blue"
                           : b.status === "attention"
-                            ? "from-amber-500 to-orange-400"
-                            : "from-rose-500 to-pink-400",
+                            ? "from-tone-warm to-tone-sla"
+                            : "from-bfresh-coral to-bfresh-coral-deep",
                     )}
                   />
                   {b.status === "critical" && (
                     <motion.span
                       animate={{ opacity: [0.4, 0.85, 0.4] }}
                       transition={{ duration: 2.2, repeat: Infinity }}
-                      className="pointer-events-none absolute inset-0 rounded-[var(--radius-lg)] bg-rose-500/8"
+                      className="bg-bfresh-coral/8 pointer-events-none absolute inset-0 rounded-[var(--radius-lg)]"
                     />
                   )}
                   <div className="relative flex items-start justify-between">
@@ -142,7 +148,9 @@ export function NetworkHeatmap({
                       <span
                         className={cn(
                           "inline-flex items-center gap-0.5 text-[10px] font-bold tabular-nums",
-                          b.trend >= 0 ? "text-emerald-700" : "text-rose-700",
+                          b.trend >= 0
+                            ? "text-tone-success"
+                            : "text-bfresh-coral",
                         )}
                       >
                         {b.trend >= 0 ? "▲" : "▼"} {Math.abs(b.trend)}%
@@ -155,8 +163,8 @@ export function NetworkHeatmap({
                         className={cn(
                           "inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 font-black tabular-nums",
                           b.movement > 0
-                            ? "bg-emerald-500/10 text-emerald-700"
-                            : "bg-rose-500/10 text-rose-700",
+                            ? "bg-bfresh-fresh-green/10 text-tone-success"
+                            : "bg-bfresh-coral/10 text-bfresh-coral",
                         )}
                       >
                         {b.movement > 0 ? "▲" : "▼"} {Math.abs(b.movement)}

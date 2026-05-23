@@ -14,21 +14,24 @@ import type { SLAAlert } from "@/types/domain";
 const SEV_META = {
   high: {
     label: "קריטי",
-    badge: "bg-rose-500/15 text-rose-700 border-rose-500/30",
-    pill: "bg-gradient-to-b from-rose-500 to-rose-600",
-    hoverBg: "hover:bg-gradient-to-l hover:from-rose-500/[0.07] hover:to-transparent",
+    badge: "bg-bfresh-coral/15 text-bfresh-coral border-bfresh-coral/30",
+    pill: "bg-gradient-to-b from-bfresh-coral to-bfresh-coral-deep",
+    hoverBg:
+      "hover:bg-gradient-to-l hover:from-bfresh-coral/[0.08] hover:to-transparent",
   },
   medium: {
     label: "בינוני",
-    badge: "bg-amber-500/15 text-amber-700 border-amber-500/30",
-    pill: "bg-gradient-to-b from-amber-500 to-orange-500",
-    hoverBg: "hover:bg-gradient-to-l hover:from-amber-500/[0.07] hover:to-transparent",
+    badge: "bg-tone-warm/15 text-tone-warm border-tone-warm/30",
+    pill: "bg-gradient-to-b from-tone-warm to-tone-sla",
+    hoverBg:
+      "hover:bg-gradient-to-l hover:from-tone-warm/[0.08] hover:to-transparent",
   },
   low: {
     label: "נמוך",
-    badge: "bg-blue-500/15 text-blue-700 border-blue-500/30",
-    pill: "bg-gradient-to-b from-blue-500 to-blue-600",
-    hoverBg: "hover:bg-gradient-to-l hover:from-blue-500/[0.07] hover:to-transparent",
+    badge: "bg-bfresh-blue/15 text-bfresh-blue border-bfresh-blue/30",
+    pill: "bg-gradient-to-b from-bfresh-blue to-bfresh-light-blue",
+    hoverBg:
+      "hover:bg-gradient-to-l hover:from-bfresh-blue/[0.06] hover:to-transparent",
   },
 } as const;
 
@@ -47,13 +50,13 @@ export function SLAAlerts({ alerts }: { alerts: SLAAlert[] }) {
       <CardHeader className="border-border/50 flex-row items-center justify-between border-b pb-4">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <div className="grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-rose-500 to-orange-500 text-white shadow-lg shadow-rose-500/30 ring-1 ring-white/30">
+            <div className="grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-bfresh-coral to-tone-warm text-white shadow-lg shadow-bfresh-coral/30 ring-1 ring-white/30">
               <Bell className="size-[18px]" />
             </div>
             <motion.span
               animate={{ scale: [1, 1.45, 1], opacity: [0.4, 0, 0.4] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-              className="pointer-events-none absolute inset-0 rounded-2xl bg-rose-500/50"
+              className="pointer-events-none absolute inset-0 rounded-2xl bg-bfresh-coral/50"
             />
           </div>
           <div>
@@ -67,10 +70,10 @@ export function SLAAlerts({ alerts }: { alerts: SLAAlert[] }) {
         </div>
         <Badge
           variant="outline"
-          className="bg-rose-500/8 border-rose-500/30 text-rose-700 gap-1.5 rounded-full py-1"
+          className="bg-bfresh-coral/8 border-bfresh-coral/30 text-bfresh-coral gap-1.5 rounded-full py-1"
         >
-          <span className="relative inline-flex size-2 rounded-full bg-rose-500">
-            <span className="absolute inset-0 animate-ping rounded-full bg-rose-500 opacity-75" />
+          <span className="bg-bfresh-coral relative inline-flex size-2 rounded-full">
+            <span className="bg-bfresh-coral absolute inset-0 animate-ping rounded-full opacity-75" />
           </span>
           <span className="tabular-nums">{high}</span> קריטי
         </Badge>
@@ -124,7 +127,7 @@ export function SLAAlerts({ alerts }: { alerts: SLAAlert[] }) {
                     </div>
                   </div>
                   <div className="flex flex-col items-end justify-between gap-1">
-                    <div className="text-rose-600 inline-flex items-center gap-1 text-xs font-black tabular-nums">
+                    <div className="text-bfresh-coral inline-flex items-center gap-1 text-xs font-black tabular-nums">
                       <AlertOctagon className="size-3" />
                       {fmtDuration(a.minutesOverdue)}
                     </div>

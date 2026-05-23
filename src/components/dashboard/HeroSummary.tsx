@@ -25,22 +25,28 @@ export function HeroSummary({
       initial={{ opacity: 0, y: -16, scale: 0.99 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={SPRING_SMOOTH}
-      className="relative overflow-hidden rounded-3xl border border-white/30 bg-gradient-to-bl from-bfresh-blue via-[color:oklch(0.58_0.17_220)] to-bfresh-fresh-green p-5 text-white shadow-[0_18px_60px_-14px_oklch(0.55_0.18_235/0.45)] md:rounded-[28px] md:p-8 lg:p-10"
+      className="bg-ocean-gradient relative overflow-hidden rounded-3xl border border-white/30 p-5 text-white shadow-[0_24px_80px_-16px_rgba(18,169,232,0.55)] md:rounded-[32px] md:p-8 lg:p-10"
     >
-      {/* Layered glow blobs */}
+      {/* Ocean glow blobs — summer light diffusion */}
       <motion.span
         aria-hidden
         initial={{ opacity: 0.6 }}
-        animate={{ opacity: [0.55, 0.8, 0.55] }}
+        animate={{ opacity: [0.55, 0.85, 0.55] }}
         transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        className="pointer-events-none absolute -top-24 -right-20 size-80 rounded-full bg-white/30 blur-3xl"
+        className="pointer-events-none absolute -top-24 -right-20 size-80 rounded-full bg-white/40 blur-3xl"
       />
       <motion.span
         aria-hidden
         initial={{ opacity: 0.5 }}
-        animate={{ opacity: [0.45, 0.7, 0.45] }}
+        animate={{ opacity: [0.45, 0.75, 0.45] }}
         transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        className="pointer-events-none absolute -bottom-24 -left-16 size-80 rounded-full bg-bfresh-fresh-green/50 blur-3xl"
+        className="bg-bfresh-fresh-green/55 pointer-events-none absolute -bottom-24 -left-16 size-80 rounded-full blur-3xl"
+      />
+      <motion.span
+        aria-hidden
+        animate={{ opacity: [0.3, 0.6, 0.3], x: [0, 30, 0] }}
+        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+        className="bg-bfresh-sky/60 pointer-events-none absolute top-1/2 left-1/3 size-64 -translate-y-1/2 rounded-full blur-3xl"
       />
       <span
         aria-hidden

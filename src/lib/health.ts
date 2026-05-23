@@ -44,16 +44,18 @@ export const STATUS_LABEL: Record<BranchStatus, string> = {
   critical: "קריטי",
 };
 
+// B-FRESH brand status tones — coral/aqua/green/coral progression
 export const STATUS_TONE: Record<
   BranchStatus,
   { fg: string; bg: string; border: string; chip: string; dot: string }
 > = {
   excellent: {
-    fg: "text-emerald-700",
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/30",
-    chip: "bg-emerald-500/15 text-emerald-700 border-emerald-500/30",
-    dot: "bg-emerald-500",
+    fg: "text-tone-success",
+    bg: "bg-bfresh-fresh-green/10",
+    border: "border-bfresh-fresh-green/30",
+    chip:
+      "bg-bfresh-fresh-green/12 text-tone-success border-bfresh-fresh-green/30",
+    dot: "bg-bfresh-fresh-green",
   },
   stable: {
     fg: "text-bfresh-blue",
@@ -63,26 +65,26 @@ export const STATUS_TONE: Record<
     dot: "bg-bfresh-blue",
   },
   attention: {
-    fg: "text-amber-700",
-    bg: "bg-amber-500/10",
-    border: "border-amber-500/30",
-    chip: "bg-amber-500/15 text-amber-700 border-amber-500/30",
-    dot: "bg-amber-500",
+    fg: "text-tone-warm",
+    bg: "bg-tone-warm/10",
+    border: "border-tone-warm/30",
+    chip: "bg-tone-warm/15 text-tone-warm border-tone-warm/30",
+    dot: "bg-tone-warm",
   },
   critical: {
-    fg: "text-rose-700",
-    bg: "bg-rose-500/10",
-    border: "border-rose-500/30",
-    chip: "bg-rose-500/15 text-rose-700 border-rose-500/30",
-    dot: "bg-rose-500",
+    fg: "text-bfresh-coral",
+    bg: "bg-bfresh-coral/10",
+    border: "border-bfresh-coral/30",
+    chip: "bg-bfresh-coral/15 text-bfresh-coral border-bfresh-coral/30",
+    dot: "bg-bfresh-coral",
   },
 };
 
 export function scoreColor(score: number): string {
-  if (score >= 88) return "#16a34a"; // emerald
-  if (score >= 75) return "#1e90ff"; // blue
-  if (score >= 60) return "#f59e0b"; // amber
-  return "#ef4444"; // rose
+  if (score >= 88) return "#3ed598"; // bfresh-fresh-green
+  if (score >= 75) return "#12a9e8"; // bfresh-blue
+  if (score >= 60) return "#ffb454"; // tone-warm
+  return "#ff7a6b"; // bfresh-coral
 }
 
 export const STATUS_RANK: Record<BranchStatus, number> = {

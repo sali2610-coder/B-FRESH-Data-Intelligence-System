@@ -151,7 +151,7 @@ export function GlobalFilters({
         disabled={activeCount === 0}
         className={cn(
           "ms-auto h-8 gap-1 rounded-lg text-xs",
-          activeCount > 0 && "text-rose-600 hover:bg-rose-500/10 hover:text-rose-700",
+          activeCount > 0 && "text-bfresh-coral hover:bg-bfresh-coral/10 hover:text-bfresh-coral",
         )}
       >
         <RotateCcw className="size-3.5" />
