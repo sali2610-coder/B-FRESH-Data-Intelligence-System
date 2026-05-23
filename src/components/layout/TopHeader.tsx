@@ -5,7 +5,6 @@ import {
   Menu,
   Search,
   RefreshCw,
-  Wifi,
   Bell,
   Command as CommandIcon,
   Sparkles,
@@ -31,6 +30,7 @@ import {
 import { Sidebar } from "./Sidebar";
 import { LiveClock } from "./LiveClock";
 import { DensityToggle } from "./DensityToggle";
+import { ConnectionBadge } from "./ConnectionBadge";
 import { SPRING_BOUNCE } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
@@ -136,13 +136,7 @@ export function TopHeader() {
               <DensityToggle />
             </div>
 
-            <div className="from-bfresh-fresh-green/10 to-bfresh-light-blue/10 text-tone-success ring-bfresh-fresh-green/25 hidden items-center gap-1.5 rounded-full bg-gradient-to-l px-3 py-1.5 text-[11px] font-bold ring-1 md:flex">
-              <span className="bg-bfresh-fresh-green relative inline-flex size-2 rounded-full">
-                <span className="bg-bfresh-fresh-green absolute inset-0 animate-ping rounded-full opacity-75" />
-              </span>
-              <Wifi className="size-3" />
-              מחובר · דמה
-            </div>
+            <ConnectionBadge />
 
             <LiveClock />
 

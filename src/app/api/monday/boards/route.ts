@@ -6,19 +6,17 @@ export const runtime = "nodejs";
 
 export async function GET() {
   try {
-    const data = await mondayService.getDashboard();
+    const boards = await mondayService.listBoards();
     const status = await mondayService.getStatus();
-    return NextResponse.json(data, {
-      headers: {
-        "x-bfresh-source": status.source,
-        "x-bfresh-label": status.label,
-      },
+    return NextResponse.json({
+      source: status.source,
+      boards,
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : "Unknown error";
     return NextResponse.json(
-      { error: message },
-      { status: 500 },
+      { source: "error", boards: [], error: message },
+      { status: 502 },
     );
   }
 }
