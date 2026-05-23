@@ -6,12 +6,28 @@ import type {
   MondayBoardSummary,
   NormalizedTicket,
 } from "@/lib/monday/types";
-import type { IntelligenceSnapshot } from "@/services/intelligence/types";
+import type {
+  ExecutiveBriefing,
+  IntelligenceSnapshot,
+} from "@/services/intelligence/types";
 import { buildSnapshot } from "@/services/intelligence/aggregator";
 import { renderDashboardData } from "@/services/intelligence/renderer";
 import { buildMockSnapshot } from "@/services/intelligence/mockBuilder";
 import { generateBriefing } from "@/services/intelligence/briefing";
-import type { ExecutiveBriefing } from "@/services/intelligence/types";
+import {
+  snapshotMemory,
+  type SnapshotSummary,
+} from "@/services/intelligence/memory";
+import {
+  generateNarratives,
+  type Narrative,
+} from "@/services/intelligence/narrative";
+import { diffSnapshots, type SnapshotDiff } from "@/services/intelligence/diff";
+import {
+  fetchAllBatches,
+  reportSources,
+  type SourcesReport,
+} from "@/services/sources/registry";
 import { intelligenceCache, CACHE_TAGS } from "@/lib/cache";
 import { getConnectionStatus, type ConnectionStatus } from "./mode";
 import {
@@ -22,7 +38,6 @@ import {
 import {
   liveGetBoardMeta,
   liveGetBranchProfile,
-  liveGetTicketBatches,
   liveGetTickets,
   liveListBoards,
 } from "./live";
@@ -34,17 +49,27 @@ async function resolved(): Promise<ConnectionStatus> {
 const SNAPSHOT_TTL_MS = 60_000;
 
 async function buildLiveSnapshot(): Promise<IntelligenceSnapshot> {
-  const batches = await liveGetTicketBatches();
-  return buildSnapshot(batches, "live");
+  const batches = await fetchAllBatches();
+  return buildSnapshot(
+    batches.map((b) => ({ board: b.board, tickets: b.tickets })),
+    "live",
+  );
 }
 
-async function getSnapshot(source: "mock" | "live"): Promise<IntelligenceSnapshot> {
+async function getSnapshot(
+  source: "mock" | "live",
+): Promise<IntelligenceSnapshot> {
   const key = `snapshot:${source}`;
-  return intelligenceCache.getOrSet(
+  const snap = await intelligenceCache.getOrSet(
     key,
     async () => (source === "live" ? buildLiveSnapshot() : buildMockSnapshot()),
     { ttlMs: SNAPSHOT_TTL_MS, tags: [CACHE_TAGS.snapshot] },
   );
+  const latest = snapshotMemory.latest();
+  if (!latest || latest.summary.generatedAt !== snap.generatedAt) {
+    snapshotMemory.record(snap);
+  }
+  return snap;
 }
 
 export interface MondayService {
@@ -56,6 +81,10 @@ export interface MondayService {
   getTickets(boardIds?: string[]): Promise<NormalizedTicket[]>;
   getSnapshot(): Promise<IntelligenceSnapshot>;
   getBriefing(): Promise<ExecutiveBriefing>;
+  getNarratives(): Promise<Narrative[]>;
+  getDiff(): Promise<SnapshotDiff | null>;
+  getHistory(): Promise<SnapshotSummary[]>;
+  getSources(): Promise<SourcesReport[]>;
 }
 
 class DispatchService implements MondayService {
@@ -69,7 +98,6 @@ class DispatchService implements MondayService {
       const snapshot = await getSnapshot(status.source);
       return renderDashboardData(snapshot);
     } catch {
-      // Last-resort fallback — never break the UI.
       const snap = await getSnapshot("mock");
       return renderDashboardData(snap);
     }
@@ -86,6 +114,28 @@ class DispatchService implements MondayService {
 
   async getBriefing(): Promise<ExecutiveBriefing> {
     return generateBriefing(await this.getSnapshot());
+  }
+
+  async getNarratives(): Promise<Narrative[]> {
+    const current = await this.getSnapshot();
+    const prev = snapshotMemory.previous()?.full;
+    const diff = prev ? diffSnapshots(prev, current) : undefined;
+    return generateNarratives(current, diff);
+  }
+
+  async getDiff(): Promise<SnapshotDiff | null> {
+    const current = await this.getSnapshot();
+    const prev = snapshotMemory.previous()?.full;
+    return prev ? diffSnapshots(prev, current) : null;
+  }
+
+  async getHistory(): Promise<SnapshotSummary[]> {
+    // Cheap: avoid forcing a snapshot fetch just to read memory.
+    return snapshotMemory.listSummaries();
+  }
+
+  async getSources(): Promise<SourcesReport[]> {
+    return reportSources();
   }
 
   async getBranchProfile(branchId: string): Promise<BranchProfile> {
@@ -135,7 +185,6 @@ class DispatchService implements MondayService {
 
 export const mondayService: MondayService = new DispatchService();
 
-// Manual cache invalidator (route handlers can call this on POST refresh).
 export function invalidateSnapshot(): number {
   return intelligenceCache.invalidate(CACHE_TAGS.snapshot);
 }

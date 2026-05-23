@@ -34,6 +34,14 @@ export type BranchEntity = Auditable & {
   region: Region;
   managerName: string | null;
   franchisee?: string | null;
+  /* Multi-country / hierarchy — optional for backwards compatibility */
+  country?: string; // ISO country code (default "IL")
+  areaId?: string | null;
+  areaManager?: string | null;
+  timezone?: string; // IANA
+  locale?: string; // BCP-47
+  /* Time-awareness — populated by intelligence layer */
+  lastUpdated?: string;
 };
 
 export type EmployeeEntity = Auditable & {

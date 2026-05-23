@@ -306,15 +306,162 @@ Never reuse a production token in preview deployments.
 
 ---
 
-## 16. Roadmap (deferred)
+## 16. Source adapters (multi-system future)
+
+`src/services/sources/` — every external system implements the same
+`SourceAdapter` interface:
+
+```ts
+interface SourceAdapter {
+  kind: 'monday' | 'whatsapp' | 'forms' | 'pos' | 'sap' | 'hr' | 'delivery' | 'bi_export';
+  name: string;
+  isEnabled(): boolean;
+  health(): Promise<SourceHealth>;
+  fetchBatches(): Promise<SourceBatch[]>;
+}
+```
+
+| Adapter | Module | Status |
+|---|---|---|
+| Monday | `sources/monday.ts` | ✅ live |
+| WhatsApp Business | `sources/stubs.ts` | stub — needs `WHATSAPP_API_TOKEN` |
+| Forms Engine | `sources/stubs.ts` | stub — needs `FORMS_INGEST_URL` |
+| POS | `sources/stubs.ts` | stub — needs `POS_API_URL` |
+| SAP | `sources/stubs.ts` | stub — needs `SAP_API_URL` |
+| HR / Roster | `sources/stubs.ts` | stub — needs `HR_API_URL` |
+| Delivery | `sources/stubs.ts` | stub — needs `DELIVERY_API_URL` |
+| BI Export | `sources/stubs.ts` | stub — needs `BI_EXPORT_URL` |
+
+`registry.ts` collects them all. `fetchAllBatches()` pulls from every
+enabled adapter in parallel; `reportSources()` returns per-source health
+for `/api/intelligence/sources`. The aggregator treats batches
+identically — no source-special-casing in the intelligence layer.
+
+To add a new adapter: implement the interface, register it in
+`ADAPTERS`, set the env var, restart. Snapshot picks it up on next
+build.
+
+---
+
+## 17. Intelligence memory & time-awareness
+
+`src/services/intelligence/memory.ts` — rolling in-process ring buffer
+of recent `IntelligenceSnapshot` summaries (cap 24). Full snapshots
+kept only for the latest 2 entries to bound memory.
+
+API:
+- `snapshotMemory.record(snapshot)` — auto-called by DispatchService
+  on every cache miss
+- `snapshotMemory.latest()` / `.previous()` — for diffing
+- `snapshotMemory.listSummaries()` — historical trail
+- `snapshotMemory.snapshotAt(ms)` — fetch first entry ≥ ms ago
+
+Swap for Redis / Vercel KV later — interface stays.
+
+`src/services/intelligence/diff.ts` exports `diffSnapshots(prev, curr)`
+returning:
+
+```ts
+{
+  networkScoreDelta, alertsDelta, criticalDelta,
+  branchesImproved[], branchesDeclined[],
+  newAlerts[], resolvedAlerts[]
+}
+```
+
+Used by narrative generator and the SSE stream.
+
+---
+
+## 18. AI narrative layer
+
+`src/services/intelligence/narrative.ts` converts raw metrics into
+Hebrew operational sentences:
+
+- "ציון בריאות הרשת כעת 78 · −3% מהמדידה הקודמת"
+- "אזור צפון משתפר — +6% ב-4 סניפים"
+- "3 סניפים מתקרבים לחריגת SLA"
+- "קפיצה בנפח תלונות ב-תל אביב מרכז · +42%"
+- "תקלה חוזרת ב-באר שבע · 'מקרר תצוגה' 5 פעמים ב-30 ימים"
+
+Each `Narrative` carries `kind` (trend / alert / risk / improvement /
+anomaly / summary), `importance`, `sentence`, `refs` (deep-link
+targets), `confidence`, `generatedAt`.
+
+Rule-based today; replace the generator with an LLM call later without
+changing consumers. UI: `<NarrativeBar />` cross-fades sentences every
+6 seconds in a glass pill under the hero.
+
+Endpoint: `GET /api/intelligence/narratives`
+
+---
+
+## 19. Predictor architecture (future-ready)
+
+`src/services/intelligence/predictors.ts` declares 5 typed predictors:
+
+| Predictor | Input | Output |
+|---|---|---|
+| `branchRiskPredictor` | branchId + snapshot | riskScore |
+| `slaBreachPredictor` | ticketId + snapshot | breachProbability |
+| `staffingForecastPredictor` | branchId + snapshot | recommendedHeadcount |
+| `recurringFailurePredictor` | branchId + signature | probability |
+| `escalationPredictor` | ticketId + snapshot | escalationProbability |
+
+All return `{ ready: false, reason }` today — call sites handle missing
+predictions gracefully. Swap to Holt-Winters / Prophet / LLM later
+without changing API shape.
+
+---
+
+## 20. Operational hierarchy & multi-country
+
+`src/domain/hierarchy.ts`:
+
+```
+HQ → Country → Region → Area → Branch → Employee/Task/Event
+```
+
+`COUNTRIES` config: `{ code, name, timezone, locale, currency }`.
+`BranchEntity` gained optional fields: `country` (ISO), `areaId`,
+`areaManager`, `timezone` (IANA), `locale` (BCP-47), `lastUpdated`.
+
+All optional → fully backwards compatible. International expansion is
+a config change, not a refactor.
+
+---
+
+## 21. SSE event types
+
+`/api/monday/stream` (v2) now emits:
+
+| Event | Payload |
+|---|---|
+| `snapshot` | `{ generatedAt, mode, networkScore, alerts, critical }` |
+| `alerts` | top 5 AlertEntity[] |
+| `narratives` | Narrative[] (current pack) |
+| `diff` | SnapshotDiff (or null) |
+| `heartbeat` | comment line every 15s |
+| `error` | `{ message }` |
+
+When Monday webhooks land, replace the poll loop in the stream route
+with webhook-triggered push. Consumers don't need to change.
+
+---
+
+## 22. Roadmap (deferred)
 
 - **Webhook ingestion** — replace polling with Monday webhooks → SSE push
-- **Statistical anomaly detection** — rolling mean ± 2σ per branch metric
-  in `processors.ts` (new function `detectStatisticalAnomalies`)
+- **Statistical anomaly detection** — rolling mean ± 2σ per branch
+  metric in `processors.ts` (new function `detectStatisticalAnomalies`)
 - **Forecasting** — Holt-Winters / Prophet for ticket volume per branch
-- **LLM Copilot** — `/api/intelligence/copilot` with Vercel AI Gateway
+- **LLM Copilot** — `/api/intelligence/copilot` via Vercel AI Gateway,
+  with narrative + briefing as RAG context
+- **Real predictor implementations** — fill in `predictors.ts` stubs
 - **Redis cache backend** — drop-in for `TaggedCache`
-- **Audit log persistence** — write snapshot diffs to durable storage for
-  post-mortem analysis
+- **Audit log persistence** — write snapshot diffs to durable storage
+  for post-mortem and regulatory reporting
+- **Country/Area UI rollups** — when multi-country data lands, add
+  region/country filters and rollup processors
 
 None of these require breaking the current API surface.

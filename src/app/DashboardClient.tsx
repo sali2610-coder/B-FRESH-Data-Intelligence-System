@@ -30,6 +30,7 @@ import { ActivityFeed } from "@/components/cockpit/ActivityFeed";
 import { SpotlightCards } from "@/components/cockpit/SpotlightCards";
 import { AICopilotRail } from "@/components/cockpit/AICopilotRail";
 import { LiveTicker } from "@/components/cockpit/LiveTicker";
+import { NarrativeBar } from "@/components/cockpit/NarrativeBar";
 import { useEffect } from "react";
 import {
   areaOption,
@@ -95,6 +96,9 @@ export default function DashboardClient() {
           slaCompliancePct={slaLatest}
           loading={loading}
         />
+
+        {/* ── Band 1.4: AI narrative bar ── */}
+        <NarrativeBar />
 
         {/* ── Band 1.5: Live operational ticker ── */}
         {data && <LiveTicker events={data.activity} />}
