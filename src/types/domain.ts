@@ -90,6 +90,109 @@ export type AIInsight = {
   recommendation?: string;
 };
 
+export type BranchStatus = "excellent" | "stable" | "attention" | "critical";
+
+export type BranchHealth = {
+  branchId: string;
+  branchName: string;
+  region: Branch["region"];
+  manager: string;
+  score: number; // 0..100
+  previousScore: number;
+  trend: number; // -100..100, % change
+  movement: number; // rank delta vs previous period
+  status: BranchStatus;
+  // Component contributions (each 0..100, weighted into score)
+  components: {
+    sla: number;
+    complaints: number;
+    inspection: number;
+    maintenance: number;
+    staffing: number;
+    sentiment: number;
+    aging: number;
+  };
+  alerts: {
+    recurringIssue: boolean;
+    slaRisk: boolean;
+    inspectionOverdue: boolean;
+    staffingShortage: boolean;
+  };
+};
+
+export type ActivityKind =
+  | "complaint_opened"
+  | "complaint_closed"
+  | "sla_breach"
+  | "maintenance_call"
+  | "technician_delay"
+  | "branch_outage"
+  | "marketing_launch"
+  | "recruitment_spike"
+  | "franchise_lead"
+  | "inspection_completed";
+
+export type ActivitySeverity = "critical" | "high" | "medium" | "low" | "info";
+
+export type ActivityEvent = {
+  id: string;
+  kind: ActivityKind;
+  severity: ActivitySeverity;
+  title: string;
+  detail?: string;
+  branchId?: string;
+  branchName?: string;
+  ownerName?: string;
+  occurredAt: string;
+  action?: { label: string; href?: string };
+};
+
+export type BranchInspection = {
+  id: string;
+  date: string;
+  score: number;
+  findings: number;
+  inspector: string;
+};
+
+export type BranchTimelineItem = {
+  id: string;
+  kind: ActivityKind | "inspection" | "note";
+  title: string;
+  detail?: string;
+  occurredAt: string;
+  severity?: ActivitySeverity;
+};
+
+export type BranchProfile = {
+  branch: Branch;
+  health: BranchHealth;
+  manager: { name: string; phone?: string; email?: string };
+  tickets: Task[];
+  ticketTrend: TimeSeriesPoint[];
+  slaTrend: TimeSeriesPoint[];
+  complaintsByCategory: { category: string; count: number }[];
+  maintenanceHistory: {
+    id: string;
+    title: string;
+    supplier: string;
+    occurredAt: string;
+    resolvedAt?: string;
+    cost?: number;
+  }[];
+  inspections: BranchInspection[];
+  staffing: {
+    headcount: number;
+    target: number;
+    openReqs: number;
+    avgTenureMonths: number;
+  };
+  csat: { score: number; trend: TimeSeriesPoint[] };
+  timeline: BranchTimelineItem[];
+  recommendations: AIInsight[];
+  similarBranches: BranchHealth[];
+};
+
 export type DashboardData = {
   kpis: KpiSnapshot;
   tasksOverTime: TimeSeriesPoint[];
@@ -104,4 +207,8 @@ export type DashboardData = {
   employeePerformance: EmployeePerformance[];
   slaAlerts: SLAAlert[];
   insights: AIInsight[];
+  branchHealth: BranchHealth[];
+  activity: ActivityEvent[];
+  networkScore: number;
+  networkScoreTrend: number; // % vs previous period
 };

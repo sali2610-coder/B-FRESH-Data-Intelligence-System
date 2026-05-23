@@ -1,6 +1,9 @@
 import type {
+  ActivityEvent,
+  ActivitySeverity,
   AIInsight,
   Branch,
+  BranchHealth,
   DashboardData,
   Employee,
   EmployeePerformance,
@@ -8,6 +11,10 @@ import type {
   Task,
   TaskStatus,
 } from "@/types/domain";
+import {
+  computeHealthScore,
+  statusFromScore,
+} from "@/lib/health";
 
 const BRANCHES: Branch[] = [
   { id: "b-tlv", name: "תל אביב מרכז", region: "center", manager: "אורי לוי" },
@@ -165,6 +172,190 @@ export function generateDashboardData(seed = 42): DashboardData {
     .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
     .slice(0, 50);
 
+  // ───────── Branch Health Engine ─────────
+  const branchHealthRaw = BRANCHES.map((b) => {
+    const bTasks = tasks.filter((t) => t.branchId === b.id);
+    const okSla = bTasks.filter((t) => t.slaState === "ok").length;
+    const breached = bTasks.filter((t) => t.slaState === "breached").length;
+    const done = bTasks.filter((t) => t.status === "done").length;
+    const open = bTasks.length - done;
+    const recurring = bTasks.length > 0 ? rand() < 0.35 : false;
+
+    const sla = bTasks.length
+      ? Math.round((okSla / bTasks.length) * 100)
+      : 92;
+    const complaintsScore = Math.max(
+      0,
+      100 - Math.round((breached / Math.max(bTasks.length, 1)) * 220),
+    );
+    const inspection = Math.round(72 + rand() * 26);
+    const maintenance = Math.round(70 + rand() * 28);
+    const staffing = Math.round(65 + rand() * 30);
+    const sentiment = Math.round(70 + rand() * 28);
+    const aging = open > 0 ? Math.max(40, 100 - open * 1.2) : 95;
+
+    const components = {
+      sla,
+      complaints: complaintsScore,
+      inspection,
+      maintenance,
+      staffing,
+      sentiment,
+      aging,
+    };
+
+    const score = computeHealthScore(components);
+    const previousScore = Math.max(
+      20,
+      Math.min(100, score + Math.round((rand() - 0.5) * 14)),
+    );
+    const trend = previousScore
+      ? Math.round(((score - previousScore) / previousScore) * 1000) / 10
+      : 0;
+
+    return {
+      branchId: b.id,
+      branchName: b.name,
+      region: b.region,
+      manager: b.manager,
+      score,
+      previousScore,
+      trend,
+      status: statusFromScore(score),
+      components,
+      alerts: {
+        recurringIssue: recurring,
+        slaRisk: bTasks.some(
+          (t) => t.slaState === "at_risk" && t.status !== "done",
+        ),
+        inspectionOverdue: inspection < 78 && rand() < 0.5,
+        staffingShortage: staffing < 75 && rand() < 0.5,
+      },
+    };
+  });
+
+  // Sort by current score → derive rank movement vs previous
+  const currentRank = [...branchHealthRaw]
+    .sort((a, b) => b.score - a.score)
+    .map((b, i) => [b.branchId, i + 1] as const);
+  const previousRank = [...branchHealthRaw]
+    .sort((a, b) => b.previousScore - a.previousScore)
+    .map((b, i) => [b.branchId, i + 1] as const);
+  const curRankMap = Object.fromEntries(currentRank);
+  const prevRankMap = Object.fromEntries(previousRank);
+
+  const branchHealth: BranchHealth[] = branchHealthRaw.map((b) => ({
+    ...b,
+    movement: (prevRankMap[b.branchId] ?? 0) - (curRankMap[b.branchId] ?? 0),
+  }));
+
+  const networkScore = Math.round(
+    branchHealth.reduce((s, b) => s + b.score, 0) /
+      Math.max(branchHealth.length, 1),
+  );
+  const networkPrev = Math.round(
+    branchHealth.reduce((s, b) => s + b.previousScore, 0) /
+      Math.max(branchHealth.length, 1),
+  );
+  const networkScoreTrend = networkPrev
+    ? Math.round(((networkScore - networkPrev) / networkPrev) * 1000) / 10
+    : 0;
+
+  // ───────── Activity Feed ─────────
+  const ACTIVITY_TEMPLATES: {
+    kind: ActivityEvent["kind"];
+    title: string;
+    severity: ActivitySeverity;
+    detail?: string;
+  }[] = [
+    {
+      kind: "sla_breach",
+      title: "חריגת SLA חמורה",
+      severity: "critical",
+      detail: "המשימה עברה את חלון הזמן המותר",
+    },
+    {
+      kind: "complaint_opened",
+      title: "תלונת לקוח חדשה",
+      severity: "high",
+      detail: "פנייה דחופה דרך וואטסאפ",
+    },
+    {
+      kind: "maintenance_call",
+      title: "קריאת שירות פתוחה",
+      severity: "medium",
+      detail: "ספק יצא לטיפול",
+    },
+    {
+      kind: "technician_delay",
+      title: "טכנאי באיחור",
+      severity: "high",
+      detail: "השהיה של 45 דקות מעבר ליעד",
+    },
+    {
+      kind: "branch_outage",
+      title: "סניף לא מקוון",
+      severity: "critical",
+      detail: "תקלת תקשורת זוהתה",
+    },
+    {
+      kind: "marketing_launch",
+      title: "השקת קמפיין",
+      severity: "info",
+      detail: "קופון חדש נשלח לחברי מועדון",
+    },
+    {
+      kind: "recruitment_spike",
+      title: "זינוק במועמדויות",
+      severity: "info",
+      detail: "5 מועמדים חדשים ב-24 שעות",
+    },
+    {
+      kind: "franchise_lead",
+      title: "ליד זכיינות חדש",
+      severity: "info",
+      detail: "פגישת היכרות תוזמנה",
+    },
+    {
+      kind: "inspection_completed",
+      title: "ביקורת הושלמה",
+      severity: "low",
+      detail: "ציון 92 · 2 הערות פעולה",
+    },
+    {
+      kind: "complaint_closed",
+      title: "תלונה נסגרה",
+      severity: "low",
+      detail: "פתרון תוך 2 שעות · CSAT 4.6",
+    },
+  ];
+
+  const activity: ActivityEvent[] = Array.from({ length: 28 }).map((_, i) => {
+    const tpl = ACTIVITY_TEMPLATES[
+      Math.floor(rand() * ACTIVITY_TEMPLATES.length)
+    ];
+    const branch = BRANCHES[Math.floor(rand() * BRANCHES.length)];
+    const emp = EMPLOYEES[Math.floor(rand() * EMPLOYEES.length)];
+    const minutesAgo = Math.round(i * 6 + rand() * 12);
+    return {
+      id: `act-${i}-${tpl.kind}`,
+      kind: tpl.kind,
+      severity: tpl.severity,
+      title: tpl.title,
+      detail: tpl.detail,
+      branchId: branch.id,
+      branchName: branch.name,
+      ownerName: emp.name,
+      occurredAt: new Date(now.getTime() - minutesAgo * 60_000).toISOString(),
+      action:
+        tpl.severity === "critical" || tpl.severity === "high"
+          ? { label: "טפל" }
+          : tpl.kind === "franchise_lead"
+            ? { label: "פתח ליד" }
+            : undefined,
+    };
+  });
+
   const branchById = Object.fromEntries(BRANCHES.map((b) => [b.id, b]));
 
   const employeePerformance: EmployeePerformance[] = EMPLOYEES.map((e) => {
@@ -316,6 +507,10 @@ export function generateDashboardData(seed = 42): DashboardData {
     employeePerformance,
     slaAlerts,
     insights,
+    branchHealth,
+    activity,
+    networkScore,
+    networkScoreTrend,
   };
 }
 

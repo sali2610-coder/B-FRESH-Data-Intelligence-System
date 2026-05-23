@@ -8,6 +8,8 @@ import {
   Crown,
   Star,
   Timer,
+  Users,
+  Wrench,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useDashboard } from "@/hooks/useDashboard";
@@ -21,11 +23,14 @@ import { GlobalFilters } from "@/components/filters/GlobalFilters";
 import { TasksTable } from "@/components/tables/TasksTable";
 import { EmployeesTable } from "@/components/tables/EmployeesTable";
 import { DetailDialog } from "@/components/dashboard/DetailDialog";
-import { AIInsights } from "@/components/dashboard/AIInsights";
 import { SLAAlerts } from "@/components/dashboard/SLAAlerts";
+import { UrgentAlertsRail } from "@/components/cockpit/UrgentAlertsRail";
+import { NetworkHeatmap } from "@/components/cockpit/NetworkHeatmap";
+import { ActivityFeed } from "@/components/cockpit/ActivityFeed";
+import { SpotlightCards } from "@/components/cockpit/SpotlightCards";
+import { AICopilotRail } from "@/components/cockpit/AICopilotRail";
 import {
   areaOption,
-  branchBarOption,
   donutOption,
   funnelOption,
   heatmapOption,
@@ -51,206 +56,247 @@ export default function DashboardClient() {
   const sparkTasks = data?.tasksOverTime.slice(-14).map((p) => p.value) ?? [];
   const sparkSLA = data?.slaCompliance.slice(-14).map((p) => p.value) ?? [];
 
+  // Active maintenance heuristic from activity feed
+  const openMaintenance =
+    data?.activity.filter((a) => a.kind === "maintenance_call").length ?? 0;
+  const recruitmentOpen =
+    data?.activity.filter((a) => a.kind === "recruitment_spike").length ?? 0;
+  const franchiseLeads =
+    data?.activity.filter((a) => a.kind === "franchise_lead").length ?? 0;
+
   return (
-    <div className="flex flex-col gap-[var(--density-section-gap,1.5rem)]">
-      <HeroSummary
-        openTasks={data?.kpis.openTasks ?? 0}
-        slaCompliancePct={slaLatest}
-        loading={loading}
-      />
-
-      {data && (
-        <GlobalFilters branches={data.branches} employees={data.employees} />
-      )}
-
-      {/* KPI Row */}
-      <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <KpiCard
-          index={0}
-          label="משימות פתוחות"
-          value="—"
-          numericValue={data?.kpis.openTasks}
-          icon={Activity}
-          accent="blue"
+    <div className="grid grid-cols-1 gap-[var(--density-section-gap,1.5rem)] xl:grid-cols-[1fr_360px]">
+      {/* MAIN COLUMN */}
+      <div className="flex min-w-0 flex-col gap-[var(--density-section-gap,1.5rem)]">
+        {/* ── Band 1: Hero ── */}
+        <HeroSummary
+          openTasks={data?.kpis.openTasks ?? 0}
+          slaCompliancePct={slaLatest}
           loading={loading}
-          trend={{ value: 4.2, positive: false }}
-          sparkline={sparkTasks}
-          hint="כולל בטיפול ובהמתנה"
         />
-        <KpiCard
-          index={1}
-          label="חריגות SLA"
-          value="—"
-          numericValue={data?.kpis.slaBreaches}
-          icon={AlertOctagon}
-          accent="rose"
-          loading={loading}
-          trend={{ value: 12, positive: false }}
-          badge={{ label: "דרוש מענה", tone: "bad" }}
-        />
-        <KpiCard
-          index={2}
-          label="זמן טיפול ממוצע"
-          value={data ? fmtDuration(data.kpis.avgHandlingMinutes) : "—"}
-          icon={Timer}
-          accent="amber"
-          loading={loading}
-          trend={{ value: 8.1, positive: true }}
-          hint="ירידה לעומת חודש קודם"
-        />
-        <KpiCard
-          index={3}
-          label="הושלמו היום"
-          value="—"
-          numericValue={data?.kpis.completedToday}
-          icon={CheckCircle2}
-          accent="green"
-          loading={loading}
-          trend={{ value: 18, positive: true }}
-          sparkline={sparkSLA}
-          badge={{ label: "מעולה", tone: "good" }}
-        />
-        <KpiCard
-          index={4}
-          label="סניף מוביל"
-          value={data?.kpis.topBranch.name ?? "—"}
-          icon={Crown}
-          accent="violet"
-          loading={loading}
-          hint={data ? `ציון SLA · ${data.kpis.topBranch.score}%` : undefined}
-        />
-        <KpiCard
-          index={5}
-          label="עובד מצטיין"
-          value={data?.kpis.topEmployee.name ?? "—"}
-          icon={Star}
-          accent="cyan"
-          loading={loading}
-          hint={
-            data
-              ? `${fmtNumber(data.kpis.topEmployee.score)} משימות הושלמו`
-              : undefined
-          }
-        />
-      </section>
 
-      {/* Charts grid */}
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <ChartCard
-          index={0}
-          title="משימות לאורך זמן"
-          subtitle="30 הימים האחרונים"
-          loading={loading}
-          className="lg:col-span-2"
-        >
-          {data && <EChart option={lineOption(data.tasksOverTime)} />}
-        </ChartCard>
+        {/* ── Band 2: Urgent rail ── */}
+        {data && <UrgentAlertsRail events={data.activity} />}
 
-        <ChartCard
-          index={1}
-          title="התפלגות סטטוסים"
-          subtitle="פיצול כלל המשימות"
-          loading={loading}
-        >
-          {data && data.statusDistribution.length > 0 ? (
-            <EChart option={donutOption(data.statusDistribution)} />
-          ) : (
-            <EmptyState />
-          )}
-        </ChartCard>
+        {/* ── Band 3: Filters ── */}
+        {data && (
+          <GlobalFilters branches={data.branches} employees={data.employees} />
+        )}
 
-        <ChartCard
-          index={2}
-          title="עמידה ביעדי SLA"
-          subtitle="אחוז עמידה יומי"
-          loading={loading}
-        >
-          {data && <EChart option={areaOption(data.slaCompliance)} />}
-        </ChartCard>
+        {/* ── Band 4: Network spotlight ── */}
+        {data && (
+          <SpotlightCards
+            branches={data.branchHealth}
+            networkScore={data.networkScore}
+            networkTrend={data.networkScoreTrend}
+          />
+        )}
 
-        <ChartCard
-          index={3}
-          title="זמני תגובה לפי יום ושעה"
-          subtitle="היטמפ ניתוח עומסים"
-          loading={loading}
-          className="lg:col-span-2"
-          minHeight={320}
-        >
-          {data && (
-            <EChart option={heatmapOption(data.responseHeatmap)} height={300} />
-          )}
-        </ChartCard>
+        {/* ── Band 5: KPI Pulse Strip ── */}
+        <section className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
+          <KpiCard
+            index={0}
+            label="פניות פתוחות"
+            value="—"
+            numericValue={data?.kpis.openTasks}
+            icon={Activity}
+            accent="blue"
+            loading={loading}
+            trend={{ value: 4.2, positive: false }}
+            sparkline={sparkTasks}
+          />
+          <KpiCard
+            index={1}
+            label="חריגות SLA"
+            value="—"
+            numericValue={data?.kpis.slaBreaches}
+            icon={AlertOctagon}
+            accent="rose"
+            loading={loading}
+            trend={{ value: 12, positive: false }}
+            badge={{ label: "דרוש מענה", tone: "bad" }}
+          />
+          <KpiCard
+            index={2}
+            label="זמן טיפול"
+            value={data ? fmtDuration(data.kpis.avgHandlingMinutes) : "—"}
+            icon={Timer}
+            accent="amber"
+            loading={loading}
+            trend={{ value: 8.1, positive: true }}
+          />
+          <KpiCard
+            index={3}
+            label="הושלמו היום"
+            value="—"
+            numericValue={data?.kpis.completedToday}
+            icon={CheckCircle2}
+            accent="green"
+            loading={loading}
+            trend={{ value: 18, positive: true }}
+            sparkline={sparkSLA}
+            badge={{ label: "מעולה", tone: "good" }}
+          />
+          <KpiCard
+            index={4}
+            label="קריאות אחזקה"
+            value="—"
+            numericValue={openMaintenance}
+            icon={Wrench}
+            accent="violet"
+            loading={loading}
+            hint="ספקים פעילים בשטח"
+          />
+          <KpiCard
+            index={5}
+            label="בריאות הרשת"
+            value="—"
+            numericValue={data?.networkScore}
+            suffix=" / 100"
+            icon={Activity}
+            accent="cyan"
+            loading={loading}
+            trend={
+              data
+                ? {
+                    value: Math.abs(data.networkScoreTrend),
+                    positive: data.networkScoreTrend >= 0,
+                  }
+                : undefined
+            }
+          />
+          <KpiCard
+            index={6}
+            label="לידים זכיינות"
+            value="—"
+            numericValue={franchiseLeads}
+            icon={Crown}
+            accent="blue"
+            loading={loading}
+            hint="חדשים השבוע"
+          />
+          <KpiCard
+            index={7}
+            label="דרושים פתוחים"
+            value="—"
+            numericValue={recruitmentOpen}
+            icon={Users}
+            accent="green"
+            loading={loading}
+            hint="זינוקי גיוס פעילים"
+          />
+        </section>
 
-        <ChartCard
-          index={4}
-          title="משפך מחזור חיים"
-          subtitle="פתיחה → סגירה → SLA"
-          loading={loading}
-        >
-          {data && <EChart option={funnelOption(data.funnel)} />}
-        </ChartCard>
+        {/* ── Band 6: Network heatmap ── */}
+        {data && <NetworkHeatmap branches={data.branchHealth} />}
 
-        <ChartCard
-          index={5}
-          title="דירוג סניפים"
-          subtitle="ציון עמידה ב-SLA"
-          loading={loading}
-          className="lg:col-span-2"
-          minHeight={320}
-        >
-          {data && (
-            <EChart option={branchBarOption(data.branchRanking)} height={300} />
-          )}
-        </ChartCard>
-      </section>
-
-      {/* Intelligence row */}
-      {data && (
-        <section className="grid grid-cols-1 gap-4 xl:grid-cols-5">
-          <div className="xl:col-span-3">
-            <AIInsights insights={data.insights} />
-          </div>
-          <div className="xl:col-span-2">
+        {/* ── Band 7: SLA + Activity ── */}
+        {data && (
+          <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <SLAAlerts alerts={data.slaAlerts} />
-          </div>
-        </section>
-      )}
+            <ActivityFeed events={data.activity} />
+          </section>
+        )}
 
-      {/* Employees ranking */}
-      {data && (
+        {/* ── Band 8: Charts grid ── */}
+        <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <ChartCard
+            index={0}
+            title="פניות לאורך זמן"
+            subtitle="30 הימים האחרונים"
+            loading={loading}
+            className="lg:col-span-2"
+          >
+            {data && <EChart option={lineOption(data.tasksOverTime)} />}
+          </ChartCard>
+
+          <ChartCard
+            index={1}
+            title="התפלגות סטטוסים"
+            subtitle="פיצול כלל המשימות"
+            loading={loading}
+          >
+            {data && data.statusDistribution.length > 0 ? (
+              <EChart option={donutOption(data.statusDistribution)} />
+            ) : (
+              <EmptyState />
+            )}
+          </ChartCard>
+
+          <ChartCard
+            index={2}
+            title="עמידה ביעדי SLA"
+            subtitle="אחוז עמידה יומי"
+            loading={loading}
+          >
+            {data && <EChart option={areaOption(data.slaCompliance)} />}
+          </ChartCard>
+
+          <ChartCard
+            index={3}
+            title="זמני תגובה לפי יום ושעה"
+            subtitle="היטמפ ניתוח עומסים"
+            loading={loading}
+            className="lg:col-span-2"
+            minHeight={320}
+          >
+            {data && (
+              <EChart
+                option={heatmapOption(data.responseHeatmap)}
+                height={300}
+              />
+            )}
+          </ChartCard>
+
+          <ChartCard
+            index={4}
+            title="משפך מחזור חיים"
+            subtitle="פתיחה → סגירה → SLA"
+            loading={loading}
+          >
+            {data && <EChart option={funnelOption(data.funnel)} />}
+          </ChartCard>
+        </section>
+
+        {/* ── Band 9: Employees ── */}
+        {data && (
+          <section>
+            <EmployeesTable rows={data.employeePerformance} />
+          </section>
+        )}
+
+        {/* ── Band 10: Recent tasks ── */}
         <section>
-          <EmployeesTable rows={data.employeePerformance} />
+          <ChartCard
+            index={5}
+            title="פניות אחרונות"
+            subtitle="לחץ על שורה לפתיחת פירוט"
+            loading={loading}
+            minHeight={420}
+          >
+            {data && (
+              <TasksTable
+                tasks={data.recentTasks}
+                branches={data.branches}
+                employees={data.employees}
+                onRowClick={setSelectedTask}
+              />
+            )}
+          </ChartCard>
         </section>
-      )}
 
-      {/* Recent tasks */}
-      <section>
-        <ChartCard
-          index={6}
-          title="משימות אחרונות"
-          subtitle="לחץ על שורה לפתיחת פירוט"
-          loading={loading}
-          minHeight={420}
-        >
-          {data && (
-            <TasksTable
-              tasks={data.recentTasks}
-              branches={data.branches}
-              employees={data.employees}
-              onRowClick={setSelectedTask}
-            />
-          )}
-        </ChartCard>
-      </section>
+        {data && (
+          <DetailDialog
+            task={selectedTask}
+            branches={data.branches}
+            employees={data.employees}
+            onOpenChange={(o) => !o && setSelectedTask(null)}
+          />
+        )}
+      </div>
 
-      {data && (
-        <DetailDialog
-          task={selectedTask}
-          branches={data.branches}
-          employees={data.employees}
-          onOpenChange={(o) => !o && setSelectedTask(null)}
-        />
-      )}
+      {/* RIGHT RAIL: AI Copilot — xl+ sticky, smaller as floating sheet */}
+      {data && <AICopilotRail insights={data.insights} />}
     </div>
   );
 }
