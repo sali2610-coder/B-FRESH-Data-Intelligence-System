@@ -1,23 +1,24 @@
 /**
  * B-FRESH Monday board mapping.
- * Tell the system which Monday boards to read and how to interpret
- * the columns on each board.
+ * Tells the intelligence platform which Monday boards to read, which
+ * domain entity each board represents, and how each column maps to
+ * normalized fields. No secrets — only IDs + rules. Safe to commit.
  *
- * HOW TO FILL THIS OUT
- * ─────────────────────────────────────────────────────────────
- * 1. Open the target board in Monday.com
- * 2. URL → ".../boards/<BOARD_ID>" → use BOARD_ID as `id` below
- * 3. For each column, hover the column header → "..." → "Column id"
- *    (copy that exact id into the `columns` block)
- * 4. Set the `department` so the dashboard knows which cockpit it feeds
- * 5. Save & restart `pnpm dev`
- *
- * Set BFRESH_DATA_MODE=live or auto (with token) to start consuming
- * these boards. Otherwise mock data is used.
- *
- * SECURITY: this file contains NO secrets. Only board IDs + column ids.
- * Safe to commit.
+ * HOW TO FILL THIS OUT — see docs/MONDAY_API_SETUP.md
  */
+
+import type { EntityType } from "@/domain";
+
+/** Internal entity types that Monday boards can map to. */
+export type BoardEntityType = Extract<
+  EntityType,
+  | "complaint"
+  | "maintenance"
+  | "inspection"
+  | "marketing_campaign"
+  | "recruitment_lead"
+  | "franchise_lead"
+>;
 
 export type BoardDepartment =
   | "customer-service"
@@ -41,28 +42,56 @@ export type BoardColumnMap = {
   source?: string;
   sla?: string;
   phone?: string;
+  supplier?: string;
+  equipment?: string;
+  cost?: string;
+  stage?: string; // for recruitment / franchise pipelines
+  score?: string; // for inspections
+  startAt?: string; // for campaigns
+  endAt?: string;
+};
+
+/** Per-board status label aliases — for non-standard Hebrew/English labels. */
+export type StatusNormalizationRules = {
+  open?: string[];
+  in_progress?: string[];
+  blocked?: string[];
+  done?: string[];
+};
+
+/** Per-board SLA thresholds in minutes. */
+export type SLARules = {
+  /** Time from open → first agent touch. */
+  responseBudgetMinutes?: number;
+  /** Time from open → done. */
+  resolutionBudgetMinutes?: number;
+  /** Multiplier on the budget after which "breached" is asserted. */
+  breachMultiplier?: number;
 };
 
 export type MondayBoardConfig = {
   id: string;
   name: string;
   department: BoardDepartment;
-  /** Optional human-readable description for diagnostics. */
+  /** Which domain entity each row on this board represents. */
+  entityType: BoardEntityType;
   description?: string;
-  /** Map of internal field → Monday column id. */
   columns: BoardColumnMap;
-  /** If true, board is consumed; flip to false to disable without removing. */
+  statusNormalization?: StatusNormalizationRules;
+  slaRules?: SLARules;
+  /** If false the board is registered but not consumed (useful for staging). */
   enabled?: boolean;
 };
 
 /**
- * Empty by default. Add real boards once Monday account is connected.
+ * Empty by default — fill once the Monday account is connected.
  *
  * Example:
  * {
  *   id: "1234567890",
  *   name: "תלונות לקוחות",
  *   department: "customer-service",
+ *   entityType: "complaint",
  *   columns: {
  *     status:   "status",
  *     priority: "priority8",
@@ -70,8 +99,17 @@ export type MondayBoardConfig = {
  *     owner:    "people",
  *     dueDate:  "date4",
  *     category: "dropdown1",
- *     region:   "region",
- *     sla:      "sla",
+ *     source:   "source",
+ *   },
+ *   statusNormalization: {
+ *     done:        ["הושלם", "נסגר", "בוצע"],
+ *     in_progress: ["בטיפול", "במעקב"],
+ *     blocked:     ["חסום", "ממתין לספק"],
+ *   },
+ *   slaRules: {
+ *     responseBudgetMinutes: 30,
+ *     resolutionBudgetMinutes: 480,
+ *     breachMultiplier: 1.0,
  *   },
  *   enabled: true,
  * }
@@ -86,6 +124,12 @@ export function getBoardsByDepartment(
   dept: BoardDepartment,
 ): MondayBoardConfig[] {
   return getEnabledBoards().filter((b) => b.department === dept);
+}
+
+export function getBoardsByEntityType(
+  entityType: BoardEntityType,
+): MondayBoardConfig[] {
+  return getEnabledBoards().filter((b) => b.entityType === entityType);
 }
 
 export function getBoardById(boardId: string): MondayBoardConfig | undefined {

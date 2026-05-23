@@ -67,6 +67,18 @@ export async function liveGetBoardMeta(
 export async function liveGetTickets(
   boardIds?: string[],
 ): Promise<NormalizedTicket[]> {
+  const batches = await liveGetTicketBatches(boardIds);
+  return batches.flatMap((b) => b.tickets);
+}
+
+export type LiveBatch = {
+  board: import("@/config/mondayBoards").MondayBoardConfig;
+  tickets: NormalizedTicket[];
+};
+
+export async function liveGetTicketBatches(
+  boardIds?: string[],
+): Promise<LiveBatch[]> {
   const all = getEnabledBoards();
   const target = boardIds && boardIds.length
     ? all.filter((b) => boardIds.includes(b.id))
@@ -79,10 +91,11 @@ export async function liveGetTickets(
     );
   }
 
-  const out: NormalizedTicket[] = [];
+  const out: LiveBatch[] = [];
   for (const board of target) {
     const items = await fetchAllItems(board.id);
-    for (const item of items) out.push(normalizeItem(item, board));
+    const normalized = items.map((it) => normalizeItem(it, board));
+    out.push({ board, tickets: normalized });
   }
   return out;
 }
