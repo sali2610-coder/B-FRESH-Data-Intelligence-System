@@ -1,13 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { AlertOctagon, Bell, ChevronLeft, ExternalLink } from "lucide-react";
+import { AlertOctagon, Bell, ChevronLeft, Inbox } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { fmtDuration, fmtRelative } from "@/lib/format";
+import { SPRING_SMOOTH, enterSlideEnd } from "@/lib/motion";
 import type { SLAAlert } from "@/types/domain";
 
 const SEV_META = {
@@ -15,22 +16,19 @@ const SEV_META = {
     label: "קריטי",
     badge: "bg-rose-500/15 text-rose-700 border-rose-500/30",
     pill: "bg-gradient-to-b from-rose-500 to-rose-600",
-    glow: "shadow-rose-500/10",
-    border: "hover:border-rose-500/40",
+    hoverBg: "hover:bg-gradient-to-l hover:from-rose-500/[0.07] hover:to-transparent",
   },
   medium: {
     label: "בינוני",
     badge: "bg-amber-500/15 text-amber-700 border-amber-500/30",
     pill: "bg-gradient-to-b from-amber-500 to-orange-500",
-    glow: "shadow-amber-500/10",
-    border: "hover:border-amber-500/40",
+    hoverBg: "hover:bg-gradient-to-l hover:from-amber-500/[0.07] hover:to-transparent",
   },
   low: {
     label: "נמוך",
     badge: "bg-blue-500/15 text-blue-700 border-blue-500/30",
     pill: "bg-gradient-to-b from-blue-500 to-blue-600",
-    glow: "shadow-blue-500/10",
-    border: "hover:border-blue-500/40",
+    hoverBg: "hover:bg-gradient-to-l hover:from-blue-500/[0.07] hover:to-transparent",
   },
 } as const;
 
@@ -45,11 +43,18 @@ export function SLAAlerts({ alerts }: { alerts: SLAAlert[] }) {
   const high = alerts.filter((a) => a.severity === "high").length;
 
   return (
-    <Card className="elev-1 flex h-full flex-col overflow-hidden border-border/60">
-      <CardHeader className="flex-row items-center justify-between border-b border-border/50 pb-4">
-        <div className="flex items-center gap-2.5">
-          <div className="grid size-10 place-items-center rounded-2xl bg-gradient-to-br from-rose-500 to-orange-500 text-white shadow-md shadow-rose-500/25">
-            <Bell className="size-4" />
+    <Card className="premium-card flex h-full flex-col overflow-hidden border-0 bg-transparent shadow-none">
+      <CardHeader className="border-border/50 flex-row items-center justify-between border-b pb-4">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <div className="grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-rose-500 to-orange-500 text-white shadow-lg shadow-rose-500/30 ring-1 ring-white/30">
+              <Bell className="size-[18px]" />
+            </div>
+            <motion.span
+              animate={{ scale: [1, 1.45, 1], opacity: [0.4, 0, 0.4] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+              className="pointer-events-none absolute inset-0 rounded-2xl bg-rose-500/50"
+            />
           </div>
           <div>
             <CardTitle className="text-base font-bold tracking-tight">
@@ -62,30 +67,31 @@ export function SLAAlerts({ alerts }: { alerts: SLAAlert[] }) {
         </div>
         <Badge
           variant="outline"
-          className="bg-rose-500/8 border-rose-500/30 text-rose-700 rounded-full gap-1.5 py-1"
+          className="bg-rose-500/8 border-rose-500/30 text-rose-700 gap-1.5 rounded-full py-1"
         >
           <span className="relative inline-flex size-2 rounded-full bg-rose-500">
             <span className="absolute inset-0 animate-ping rounded-full bg-rose-500 opacity-75" />
           </span>
-          {high} קריטי
+          <span className="tabular-nums">{high}</span> קריטי
         </Badge>
       </CardHeader>
       <CardContent className="flex-1 p-0">
-        <ScrollArea className="h-[360px] px-4 py-3">
+        <ScrollArea className="h-[380px] px-4 py-3">
           <ul className="flex flex-col gap-2">
             {sorted.map((a, i) => {
               const meta = SEV_META[a.severity];
               return (
                 <motion.li
                   key={a.id}
-                  initial={{ opacity: 0, x: 12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.04 }}
+                  variants={enterSlideEnd(i)}
+                  initial="hidden"
+                  animate="visible"
+                  whileHover={{ x: -3 }}
+                  transition={SPRING_SMOOTH}
                   className={cn(
-                    "group bg-card relative flex items-stretch gap-3 rounded-2xl border border-transparent p-3 transition-all",
-                    "hover:bg-accent/30 hover:elev-1",
-                    meta.border,
-                    meta.glow,
+                    "group bg-card relative flex items-stretch gap-3 rounded-2xl border border-transparent p-3 transition-all duration-300",
+                    "hover:border-border/60 hover:elev-1",
+                    meta.hoverBg,
                   )}
                 >
                   <span
@@ -99,13 +105,13 @@ export function SLAAlerts({ alerts }: { alerts: SLAAlert[] }) {
                       <Badge
                         variant="outline"
                         className={cn(
-                          "rounded-full text-[10px] uppercase tracking-wide",
+                          "rounded-full text-[10px] uppercase tracking-wider",
                           meta.badge,
                         )}
                       >
                         {meta.label}
                       </Badge>
-                      <span className="text-sm font-bold leading-tight truncate">
+                      <span className="truncate text-sm font-bold leading-tight">
                         {a.taskTitle}
                       </span>
                     </div>
@@ -136,8 +142,9 @@ export function SLAAlerts({ alerts }: { alerts: SLAAlert[] }) {
             })}
             {sorted.length === 0 && (
               <li className="text-muted-foreground flex flex-col items-center gap-2 py-12 text-center text-sm">
-                <ExternalLink className="size-6 opacity-30" />
-                אין התרעות פעילות כרגע 🎉
+                <Inbox className="text-emerald-500 size-8 opacity-50" />
+                <span className="font-bold">אין התרעות פעילות 🎉</span>
+                <span className="text-xs">הרשת עומדת ביעדי השירות</span>
               </li>
             )}
           </ul>

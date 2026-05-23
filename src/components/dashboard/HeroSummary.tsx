@@ -1,9 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Activity, Sparkles, Zap } from "lucide-react";
+import { Activity, Sparkles, Zap, Radio } from "lucide-react";
 import NumberFlow from "@number-flow/react";
 import { fmtDate } from "@/lib/format";
+import { SPRING_SMOOTH } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 export function HeroSummary({
@@ -21,42 +22,70 @@ export function HeroSummary({
 
   return (
     <motion.section
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, ease: "easeOut" }}
-      className="relative overflow-hidden rounded-3xl border border-white/40 bg-gradient-to-bl from-bfresh-blue via-[color:oklch(0.6_0.16_220)] to-bfresh-fresh-green p-6 text-white shadow-xl shadow-bfresh-blue/15 md:p-8"
+      initial={{ opacity: 0, y: -16, scale: 0.99 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={SPRING_SMOOTH}
+      className="relative overflow-hidden rounded-[28px] border border-white/30 bg-gradient-to-bl from-bfresh-blue via-[color:oklch(0.58_0.17_220)] to-bfresh-fresh-green p-6 text-white shadow-[0_24px_80px_-12px_oklch(0.55_0.18_235/0.45)] md:p-8 lg:p-10"
     >
-      {/* glow blobs */}
-      <span className="pointer-events-none absolute -top-24 -right-20 size-72 rounded-full bg-white/25 blur-3xl" />
-      <span className="pointer-events-none absolute -bottom-20 -left-10 size-72 rounded-full bg-bfresh-fresh-green/40 blur-3xl" />
-
-      {/* grid pattern overlay */}
+      {/* Layered glow blobs */}
+      <motion.span
+        aria-hidden
+        initial={{ opacity: 0.6 }}
+        animate={{ opacity: [0.55, 0.8, 0.55] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        className="pointer-events-none absolute -top-24 -right-20 size-80 rounded-full bg-white/30 blur-3xl"
+      />
+      <motion.span
+        aria-hidden
+        initial={{ opacity: 0.5 }}
+        animate={{ opacity: [0.45, 0.7, 0.45] }}
+        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        className="pointer-events-none absolute -bottom-24 -left-16 size-80 rounded-full bg-bfresh-fresh-green/50 blur-3xl"
+      />
       <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent"
+      />
+
+      {/* Grid pattern */}
+      <span
+        aria-hidden
         className="pointer-events-none absolute inset-0 opacity-[0.07]"
         style={{
           backgroundImage:
             "linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)",
-          backgroundSize: "24px 24px",
+          backgroundSize: "28px 28px",
+          maskImage:
+            "radial-gradient(ellipse at center, black 30%, transparent 75%)",
         }}
       />
 
       <div className="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-        <div className="space-y-3">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold backdrop-blur-md">
-            <Sparkles className="size-3" />
+        <div className="space-y-4">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-3 py-1.5 text-[11px] font-bold backdrop-blur-md">
+            <Radio className="size-3" />
             {environment}
             <span className="mx-1 size-1 rounded-full bg-white/50" />
             {fmtDate(today, "EEEE · d בMMMM yyyy")}
           </div>
 
-          <h1 className="text-3xl font-black leading-tight tracking-tight md:text-4xl lg:text-[2.6rem]">
-            מרכז הבקרה של <span className="text-white/95">B-FRESH</span>
-          </h1>
+          <div>
+            <h1 className="text-3xl font-black leading-[1.1] tracking-tight md:text-4xl lg:text-[2.7rem]">
+              מרכז הבקרה של{" "}
+              <span className="bg-gradient-to-l from-white to-white/70 bg-clip-text text-transparent">
+                B-FRESH
+              </span>
+            </h1>
+            <p className="mt-2 max-w-xl text-sm text-white/85 md:text-[15px]">
+              תמונת מצב חיה של ביצועי הרשת, סניפים, עובדים ועמידה ביעדי שירות —
+              מתעדכן בזמן אמת.
+            </p>
+          </div>
 
-          <p className="max-w-xl text-sm text-white/85 md:text-[15px]">
-            תמונת מצב חיה של ביצועי הרשת, סניפים, עובדים ועמידה ביעדי שירות —
-            מתעדכן בזמן אמת.
-          </p>
+          <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-white/85">
+            <Sparkles className="size-3" />
+            תובנות AI פעילות · ניתוח מתבצע ברקע
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-3 md:flex-nowrap">
@@ -93,34 +122,37 @@ function HeroPill({
   decimals?: number;
 }) {
   return (
-    <div
+    <motion.div
+      whileHover={{ y: -2 }}
+      transition={SPRING_SMOOTH}
       className={cn(
-        "relative flex min-w-[170px] items-center gap-3 rounded-2xl bg-white/15 px-4 py-3 backdrop-blur-md",
-        "border border-white/25 shadow-inner shadow-white/10",
+        "sheen relative flex min-w-[180px] items-center gap-3 rounded-2xl border border-white/25 bg-white/15 px-4 py-3.5 backdrop-blur-xl",
+        "shadow-[inset_0_1px_0_0_oklch(1_0_0/0.25),0_8px_24px_-6px_oklch(0_0_0/0.2)]",
       )}
     >
-      <div className="grid size-9 place-items-center rounded-xl bg-white/20">
+      <div className="grid size-10 place-items-center rounded-xl bg-white/25 ring-1 ring-white/30">
         <Icon className="size-4" />
       </div>
       <div className="leading-tight">
-        <div className="text-[11px] font-medium uppercase tracking-wide text-white/75">
+        <div className="text-[10.5px] font-bold uppercase tracking-wider text-white/80">
           {label}
         </div>
-        <div className="text-xl font-black tabular-nums">
+        <div className="text-[22px] font-black tabular-nums">
           {value === null ? (
-            <span className="text-white/60">—</span>
+            <span className="text-white/55">—</span>
           ) : (
             <>
               <NumberFlow
                 value={value}
                 format={{ maximumFractionDigits: decimals }}
                 locales="he-IL"
+                spinTiming={{ duration: 800, easing: "cubic-bezier(0.22,1,0.36,1)" }}
               />
               {suffix}
             </>
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

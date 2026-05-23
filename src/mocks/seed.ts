@@ -225,6 +225,8 @@ export function generateDashboardData(seed = 42): DashboardData {
     {
       id: "ins-1",
       kind: weekDelta < 0 ? "positive" : "warning",
+      importance: Math.abs(weekDelta) > 15 ? "high" : "medium",
+      confidence: 0.92,
       title:
         weekDelta < 0
           ? `שיפור בנפח השבוע · ${Math.abs(weekDelta)}% פחות פניות`
@@ -233,39 +235,58 @@ export function generateDashboardData(seed = 42): DashboardData {
         weekDelta < 0
           ? "ירידה במספר הפניות הנכנסות לעומת השבוע הקודם — סימן חיובי לעומסים."
           : "מומלץ לבחון תוספת כוח אדם או שינוי בתורנויות לשעות עומס.",
+      recommendation:
+        weekDelta < 0
+          ? "שמור על קצב הסגירות הנוכחי וצמצם תורנות מיותרת"
+          : "הוסף נציג אחד לחלון 18:00-21:00",
       metric: `${lastTotal} פניות · 7 ימים`,
     },
     {
       id: "ins-2",
       kind: avgSla >= 85 ? "positive" : avgSla >= 70 ? "info" : "warning",
+      importance: avgSla < 70 ? "high" : "medium",
+      confidence: 0.88,
       title: `עמידת SLA ממוצעת · ${avgSla.toFixed(1)}%`,
       detail:
         avgSla >= 85
           ? "הרשת עומדת ביעדי שירות מצוינים השבוע."
           : "מומלץ להגדיל מענה בשעות 18:00-21:00 כדי לשפר עמידה ב-SLA.",
+      recommendation:
+        avgSla >= 85
+          ? "המשך לעקוב — אין צורך בפעולה"
+          : "פתח התרעה אוטומטית לכל משימה שמתקרבת ל-90% מהזמן המוקצב",
     },
     {
       id: "ins-3",
       kind: "info",
+      importance: "low",
+      confidence: 0.95,
       title: `${topEmp.name} מוביל את הרשת`,
       detail: `${topEmp.done} משימות הושלמו (${topEmp.branchName}). ביצועיו גבוהים ב-${Math.max(
         12,
         Math.abs(topEmp.trend),
       )}% מהממוצע.`,
+      recommendation: "שקול מתן חונכות לעובדים חדשים בסניף",
     },
     {
       id: "ins-4",
       kind: "warning",
+      importance: "high",
+      confidence: 0.81,
       title: `שעת עומס מזוהה · ${HEBREW_DAYS[peakHour.weekday]} · ${peakHour.hour}:00`,
       detail:
         "ריכוז גבוה של זמני תגובה ארוכים. שקול הוספת נציג נוסף בחלון הזמן הזה.",
+      recommendation: "תזמן תורנות נוספת בחלון הזמן הזה למשך 14 ימים",
       metric: `${peakHour.value} דקות תגובה ממוצעות`,
     },
     {
       id: "ins-5",
       kind: branchScores[0].score >= 85 ? "positive" : "info",
+      importance: "medium",
+      confidence: 0.9,
       title: `${branchScores[0].name} · סניף מוביל ברשת`,
       detail: `ציון עמידה ב-SLA ${branchScores[0].score}% — ${branchScores[branchScores.length - 1].score}% בסניף הנמוך ביותר. פער של ${branchScores[0].score - branchScores[branchScores.length - 1].score} נק'.`,
+      recommendation: "העתק נהלים מהסניף המוביל לסניפים נמוכים יותר",
     },
   ];
 

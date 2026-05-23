@@ -7,14 +7,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { fmtDuration, fmtNumber } from "@/lib/format";
+import { useUI } from "@/lib/stores/ui";
 import type { EmployeePerformance } from "@/types/domain";
 
 export function EmployeesTable({ rows }: { rows: EmployeePerformance[] }) {
+  const density = useUI((s) => s.density);
+  const compact = density === "compact";
   const maxDone = Math.max(...rows.map((r) => r.done), 1);
+  const rowPad = compact ? "py-2" : "py-3";
 
   return (
-    <Card className="elev-1 overflow-hidden border-border/60">
-      <CardHeader className="flex-row items-center justify-between border-b border-border/50 pb-4">
+    <Card className="premium-card overflow-hidden border-0 bg-transparent shadow-none">
+      <CardHeader className="border-border/50 flex-row items-center justify-between border-b pb-4">
         <div>
           <CardTitle className="text-base font-bold tracking-tight">
             ביצועי עובדים · רנקינג חי
@@ -23,36 +27,44 @@ export function EmployeesTable({ rows }: { rows: EmployeePerformance[] }) {
             דירוג לפי משימות שהושלמו, עמידה ב-SLA וזמן טיפול ממוצע
           </p>
         </div>
-        <Badge variant="outline" className="rounded-full">
+        <Badge variant="outline" className="rounded-full font-bold">
           {rows.length} עובדים
         </Badge>
       </CardHeader>
       <CardContent className="overflow-x-auto p-0">
-        <div className="max-h-[520px] overflow-y-auto">
+        <div className="relative max-h-[520px] overflow-y-auto">
           <table className="w-full min-w-[720px] text-sm">
-            <thead className="bg-muted/40 backdrop-blur-md sticky top-0 z-10">
-              <tr className="text-muted-foreground border-b text-start text-[10.5px] uppercase tracking-wider">
-                <th className="py-3 ps-4 text-start font-bold">#</th>
-                <th className="py-3 text-start font-bold">עובד</th>
-                <th className="py-3 text-start font-bold">סניף</th>
-                <th className="py-3 text-start font-bold">פתוחות</th>
-                <th className="py-3 text-start font-bold">הושלמו</th>
-                <th className="py-3 text-start font-bold">זמן טיפול</th>
-                <th className="py-3 text-start font-bold">SLA</th>
-                <th className="py-3 text-start font-bold">מגמה</th>
-                <th className="py-3 pe-4 text-start font-bold"></th>
+            <thead className="sticky top-0 z-10">
+              <tr className="bg-gradient-to-b from-muted/70 via-muted/55 to-muted/30 text-muted-foreground border-b border-border/60 text-start text-[10.5px] uppercase tracking-wider backdrop-blur-md">
+                <th className={cn("ps-4 text-start font-bold", rowPad)}>#</th>
+                <th className={cn("text-start font-bold", rowPad)}>עובד</th>
+                <th className={cn("text-start font-bold", rowPad)}>סניף</th>
+                <th className={cn("text-start font-bold", rowPad)}>פתוחות</th>
+                <th className={cn("text-start font-bold", rowPad)}>הושלמו</th>
+                <th className={cn("text-start font-bold", rowPad)}>זמן טיפול</th>
+                <th className={cn("text-start font-bold", rowPad)}>SLA</th>
+                <th className={cn("text-start font-bold", rowPad)}>מגמה</th>
+                <th className={cn("pe-4 text-start font-bold", rowPad)}></th>
               </tr>
             </thead>
             <tbody>
               {rows.map((r, i) => (
                 <motion.tr
                   key={r.employeeId}
-                  initial={{ opacity: 0, y: 6 }}
+                  initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.025 }}
-                  className="hover:bg-accent/30 group border-b border-border/40 last:border-0 transition-colors"
+                  transition={{
+                    duration: 0.3,
+                    delay: i * 0.025,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                  className={cn(
+                    "group border-b border-border/30 last:border-0 transition-colors",
+                    i % 2 === 0 ? "bg-transparent" : "bg-muted/[0.18]",
+                    "hover:bg-bfresh-blue/[0.04]",
+                  )}
                 >
-                  <td className="py-3 ps-4">
+                  <td className={cn("ps-4", rowPad)}>
                     <span
                       className={cn(
                         "grid size-8 place-items-center rounded-xl text-xs font-black tabular-nums",
@@ -68,7 +80,7 @@ export function EmployeesTable({ rows }: { rows: EmployeePerformance[] }) {
                       {i === 0 ? <Crown className="size-3.5" /> : i + 1}
                     </span>
                   </td>
-                  <td className="py-3">
+                  <td className={rowPad}>
                     <div className="flex items-center gap-3">
                       <span
                         className="grid size-9 place-items-center rounded-full text-sm font-black text-white shadow-md ring-2 ring-white"
@@ -84,15 +96,20 @@ export function EmployeesTable({ rows }: { rows: EmployeePerformance[] }) {
                       </div>
                     </div>
                   </td>
-                  <td className="text-muted-foreground py-3 text-xs font-medium">
+                  <td
+                    className={cn(
+                      "text-muted-foreground text-xs font-medium",
+                      rowPad,
+                    )}
+                  >
                     {r.branchName}
                   </td>
-                  <td className="py-3 tabular-nums font-semibold">
+                  <td className={cn("tabular-nums font-semibold", rowPad)}>
                     {fmtNumber(r.open)}
                   </td>
-                  <td className="py-3">
+                  <td className={rowPad}>
                     <div className="flex items-center gap-3">
-                      <span className="text-sm font-black tabular-nums w-7">
+                      <span className="w-7 text-sm font-black tabular-nums">
                         {fmtNumber(r.done)}
                       </span>
                       <div className="bg-muted relative h-2 w-24 overflow-hidden rounded-full">
@@ -101,18 +118,22 @@ export function EmployeesTable({ rows }: { rows: EmployeePerformance[] }) {
                           animate={{
                             width: `${(r.done / maxDone) * 100}%`,
                           }}
-                          transition={{ duration: 0.6, delay: i * 0.04 }}
-                          className="from-bfresh-blue to-bfresh-fresh-green absolute inset-y-0 start-0 rounded-full bg-gradient-to-l"
+                          transition={{
+                            duration: 0.8,
+                            delay: i * 0.04,
+                            ease: [0.22, 1, 0.36, 1],
+                          }}
+                          className="from-bfresh-blue to-bfresh-fresh-green absolute inset-y-0 start-0 rounded-full bg-gradient-to-l shadow-sm shadow-bfresh-blue/20"
                         />
                       </div>
                     </div>
                   </td>
-                  <td className="text-muted-foreground py-3 text-xs">
+                  <td className={cn("text-muted-foreground text-xs", rowPad)}>
                     {r.avgHandlingMinutes
                       ? fmtDuration(r.avgHandlingMinutes)
                       : "—"}
                   </td>
-                  <td className="py-3">
+                  <td className={rowPad}>
                     <Badge
                       variant="outline"
                       className={cn(
@@ -127,7 +148,7 @@ export function EmployeesTable({ rows }: { rows: EmployeePerformance[] }) {
                       {r.slaScore}%
                     </Badge>
                   </td>
-                  <td className="py-3">
+                  <td className={rowPad}>
                     <span
                       className={cn(
                         "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-black tabular-nums",
@@ -139,11 +160,11 @@ export function EmployeesTable({ rows }: { rows: EmployeePerformance[] }) {
                       {r.trend >= 0 ? "▲" : "▼"} {Math.abs(r.trend)}%
                     </span>
                   </td>
-                  <td className="py-3 pe-4 text-end">
+                  <td className={cn("pe-4 text-end", rowPad)}>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-bfresh-blue hover:bg-bfresh-blue/10 h-7 gap-1 rounded-lg px-2 text-[11px] font-bold opacity-0 transition-opacity group-hover:opacity-100"
+                      className="text-bfresh-blue hover:bg-bfresh-blue/10 h-7 gap-1 rounded-lg px-2 text-[11px] font-bold opacity-0 transition-all -translate-x-1 group-hover:translate-x-0 group-hover:opacity-100"
                     >
                       פרופיל
                       <ChevronLeft className="size-3" />

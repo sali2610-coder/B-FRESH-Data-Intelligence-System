@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { fmtDuration, fmtRelative } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useUI } from "@/lib/stores/ui";
 import type { Branch, Employee, Task, TaskStatus, SLAState } from "@/types/domain";
 
 const STATUS_LABEL: Record<TaskStatus, string> = {
@@ -56,6 +57,9 @@ export function TasksTable({
   const [sorting, setSorting] = useState<SortingState>([
     { id: "createdAt", desc: true },
   ]);
+  const density = useUI((s) => s.density);
+  const compact = density === "compact";
+  const rowPad = compact ? "py-2" : "py-3";
 
   const branchMap = useMemo(
     () => Object.fromEntries(branches.map((b) => [b.id, b])),
@@ -172,15 +176,21 @@ export function TasksTable({
   });
 
   return (
-    <div className="border-border/60 max-h-[560px] overflow-auto rounded-2xl border">
+    <div className="border-border/60 relative max-h-[560px] overflow-auto rounded-2xl border">
       <table className="w-full min-w-[820px] text-sm">
-        <thead className="bg-muted/50 sticky top-0 z-10 backdrop-blur-md">
+        <thead className="sticky top-0 z-10">
           {table.getHeaderGroups().map((hg) => (
-            <tr key={hg.id} className="border-b border-border/50">
+            <tr
+              key={hg.id}
+              className="border-b border-border/50 bg-gradient-to-b from-muted/70 via-muted/55 to-muted/30 backdrop-blur-md"
+            >
               {hg.headers.map((h) => (
                 <th
                   key={h.id}
-                  className="py-3 ps-4 text-start text-[10.5px] uppercase tracking-wider"
+                  className={cn(
+                    "ps-4 text-start text-[10.5px] uppercase tracking-wider",
+                    rowPad,
+                  )}
                 >
                   {h.isPlaceholder ? null : (
                     <Button
@@ -200,19 +210,23 @@ export function TasksTable({
           ))}
         </thead>
         <tbody>
-          {table.getRowModel().rows.map((row) => (
+          {table.getRowModel().rows.map((row, i) => (
             <tr
               key={row.id}
               onClick={() => onRowClick?.(row.original)}
-              className="hover:bg-accent/30 group border-b border-border/40 last:border-0 cursor-pointer transition-colors"
+              className={cn(
+                "group border-b border-border/30 last:border-0 cursor-pointer transition-colors",
+                i % 2 === 0 ? "bg-transparent" : "bg-muted/[0.18]",
+                "hover:bg-bfresh-blue/[0.05]",
+              )}
             >
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="py-3 ps-4">
+                <td key={cell.id} className={cn("ps-4", rowPad)}>
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
-              <td className="py-3 pe-4 text-end">
-                <ChevronLeft className="text-muted-foreground inline size-4 transition-transform group-hover:-translate-x-0.5" />
+              <td className={cn("pe-4 text-end", rowPad)}>
+                <ChevronLeft className="text-muted-foreground/70 group-hover:text-bfresh-blue inline size-4 transition-all -translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-100" />
               </td>
             </tr>
           ))}

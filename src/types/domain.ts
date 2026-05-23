@@ -85,6 +85,9 @@ export type AIInsight = {
   title: string;
   detail: string;
   metric?: string;
+  confidence?: number; // 0..1
+  importance?: "high" | "medium" | "low";
+  recommendation?: string;
 };
 
 export type DashboardData = {

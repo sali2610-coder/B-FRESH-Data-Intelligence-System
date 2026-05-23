@@ -52,7 +52,7 @@ export default function DashboardClient() {
   const sparkSLA = data?.slaCompliance.slice(-14).map((p) => p.value) ?? [];
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-[var(--density-section-gap,1.5rem)]">
       <HeroSummary
         openTasks={data?.kpis.openTasks ?? 0}
         slaCompliancePct={slaLatest}

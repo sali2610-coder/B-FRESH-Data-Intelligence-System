@@ -35,13 +35,18 @@ const STATUS_LABEL: Record<TaskStatus, string> = {
 };
 
 const tooltipBase = {
-  backgroundColor: "rgba(255,255,255,0.96)",
+  backgroundColor: "rgba(255,255,255,0.97)",
   borderColor: "rgba(15,23,42,0.06)",
   borderWidth: 1,
-  padding: [8, 12] as [number, number],
-  textStyle: { color: "#0f172a", fontSize: 12, fontWeight: 600 },
+  padding: [10, 14] as [number, number],
+  textStyle: {
+    color: "#0f172a",
+    fontSize: 12,
+    fontWeight: 600,
+    fontFamily: "var(--font-heebo), Heebo, system-ui, sans-serif",
+  },
   extraCssText:
-    "border-radius:12px; box-shadow:0 8px 28px rgba(15,23,42,0.12); backdrop-filter:blur(8px);",
+    "border-radius:14px; box-shadow:0 12px 36px -8px rgba(15,23,42,0.18), 0 2px 6px rgba(15,23,42,0.06); backdrop-filter:blur(12px) saturate(140%); transition:all 0.22s cubic-bezier(0.16,1,0.3,1);",
 };
 
 const baseGrid = {
@@ -97,16 +102,26 @@ export function lineOption(series: TimeSeriesPoint[]): EChartsOption {
     series: [
       {
         type: "line",
-        smooth: true,
+        smooth: 0.4,
         symbol: "circle",
-        symbolSize: 7,
+        symbolSize: 8,
         showSymbol: false,
-        emphasis: { focus: "series", scale: 1.6 },
+        sampling: "lttb",
+        emphasis: {
+          focus: "series",
+          scale: 1.8,
+          itemStyle: {
+            shadowColor: "rgba(30,144,255,0.45)",
+            shadowBlur: 16,
+          },
+        },
+        animationDuration: 900,
+        animationEasing: "cubicOut",
         lineStyle: {
           width: 3,
           color: CHART_PALETTE.blue,
           shadowColor: "rgba(30,144,255,0.35)",
-          shadowBlur: 12,
+          shadowBlur: 14,
           shadowOffsetY: 4,
         },
         itemStyle: {
@@ -122,7 +137,8 @@ export function lineOption(series: TimeSeriesPoint[]): EChartsOption {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: "rgba(30,144,255,0.28)" },
+              { offset: 0, color: "rgba(30,144,255,0.32)" },
+              { offset: 0.6, color: "rgba(30,144,255,0.08)" },
               { offset: 1, color: "rgba(30,144,255,0)" },
             ],
           },
@@ -174,9 +190,19 @@ export function areaOption(series: TimeSeriesPoint[]): EChartsOption {
     series: [
       {
         type: "line",
-        smooth: true,
+        smooth: 0.4,
         symbol: "none",
-        lineStyle: { width: 2.5, color: CHART_PALETTE.green },
+        sampling: "lttb",
+        animationDuration: 900,
+        animationEasing: "cubicOut",
+        emphasis: { focus: "series" },
+        lineStyle: {
+          width: 2.5,
+          color: CHART_PALETTE.green,
+          shadowColor: "rgba(34,197,94,0.3)",
+          shadowBlur: 10,
+          shadowOffsetY: 3,
+        },
         areaStyle: {
           color: {
             type: "linear",
@@ -185,7 +211,8 @@ export function areaOption(series: TimeSeriesPoint[]): EChartsOption {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: "rgba(34,197,94,0.45)" },
+              { offset: 0, color: "rgba(34,197,94,0.5)" },
+              { offset: 0.6, color: "rgba(34,197,94,0.12)" },
               { offset: 1, color: "rgba(34,197,94,0)" },
             ],
           },
