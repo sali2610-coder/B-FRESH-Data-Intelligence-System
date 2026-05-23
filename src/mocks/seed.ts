@@ -1,7 +1,10 @@
 import type {
+  AIInsight,
   Branch,
   DashboardData,
   Employee,
+  EmployeePerformance,
+  SLAAlert,
   Task,
   TaskStatus,
 } from "@/types/domain";
@@ -162,6 +165,110 @@ export function generateDashboardData(seed = 42): DashboardData {
     .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
     .slice(0, 50);
 
+  const branchById = Object.fromEntries(BRANCHES.map((b) => [b.id, b]));
+
+  const employeePerformance: EmployeePerformance[] = EMPLOYEES.map((e) => {
+    const eTasks = tasks.filter((t) => t.assigneeId === e.id);
+    const done = eTasks.filter((t) => t.status === "done");
+    const open = eTasks.filter((t) => t.status !== "done").length;
+    const okSla = eTasks.filter((t) => t.slaState === "ok").length;
+    const avg =
+      done.reduce((s, t) => s + (t.handlingMinutes ?? 0), 0) /
+      Math.max(done.length, 1);
+    return {
+      employeeId: e.id,
+      name: e.name,
+      role: e.role,
+      branchName: branchById[e.branchId]?.name ?? "—",
+      avatarColor: e.avatarColor,
+      open,
+      done: done.length,
+      avgHandlingMinutes: Math.round(avg),
+      slaScore: eTasks.length ? Math.round((okSla / eTasks.length) * 100) : 0,
+      trend: Math.round((rand() - 0.4) * 30),
+    };
+  }).sort((a, b) => b.done - a.done);
+
+  const breached = tasks.filter((t) => t.slaState === "breached").slice(0, 8);
+  const slaAlerts: SLAAlert[] = breached.map((t, idx) => {
+    const overdue = Math.round(60 + rand() * 720);
+    const sev: SLAAlert["severity"] =
+      overdue > 480 ? "high" : overdue > 180 ? "medium" : "low";
+    const emp = EMPLOYEES.find((e) => e.id === t.assigneeId);
+    return {
+      id: `alert-${idx}-${t.id}`,
+      taskTitle: t.title,
+      branchName: branchById[t.branchId]?.name ?? "—",
+      assigneeName: emp?.name ?? "—",
+      severity: sev,
+      minutesOverdue: overdue,
+      occurredAt: t.dueAt,
+    };
+  });
+
+  const lastTotal = tasksOverTime.slice(-7).reduce((s, p) => s + p.value, 0);
+  const prevTotal = tasksOverTime.slice(-14, -7).reduce((s, p) => s + p.value, 0);
+  const weekDelta = prevTotal
+    ? Math.round(((lastTotal - prevTotal) / prevTotal) * 100)
+    : 0;
+  const lastSla = slaCompliance.slice(-7);
+  const avgSla =
+    lastSla.reduce((s, p) => s + p.value, 0) / Math.max(lastSla.length, 1);
+  const topEmp = employeePerformance[0];
+  const peakHour = responseHeatmap.reduce(
+    (acc, p) => (p.value > acc.value ? p : acc),
+    responseHeatmap[0],
+  );
+  const HEBREW_DAYS = ["א'", "ב'", "ג'", "ד'", "ה'", "ו'", "שבת"];
+
+  const insights: AIInsight[] = [
+    {
+      id: "ins-1",
+      kind: weekDelta < 0 ? "positive" : "warning",
+      title:
+        weekDelta < 0
+          ? `שיפור בנפח השבוע · ${Math.abs(weekDelta)}% פחות פניות`
+          : `עלייה בנפח השבוע · ${weekDelta}% יותר פניות`,
+      detail:
+        weekDelta < 0
+          ? "ירידה במספר הפניות הנכנסות לעומת השבוע הקודם — סימן חיובי לעומסים."
+          : "מומלץ לבחון תוספת כוח אדם או שינוי בתורנויות לשעות עומס.",
+      metric: `${lastTotal} פניות · 7 ימים`,
+    },
+    {
+      id: "ins-2",
+      kind: avgSla >= 85 ? "positive" : avgSla >= 70 ? "info" : "warning",
+      title: `עמידת SLA ממוצעת · ${avgSla.toFixed(1)}%`,
+      detail:
+        avgSla >= 85
+          ? "הרשת עומדת ביעדי שירות מצוינים השבוע."
+          : "מומלץ להגדיל מענה בשעות 18:00-21:00 כדי לשפר עמידה ב-SLA.",
+    },
+    {
+      id: "ins-3",
+      kind: "info",
+      title: `${topEmp.name} מוביל את הרשת`,
+      detail: `${topEmp.done} משימות הושלמו (${topEmp.branchName}). ביצועיו גבוהים ב-${Math.max(
+        12,
+        Math.abs(topEmp.trend),
+      )}% מהממוצע.`,
+    },
+    {
+      id: "ins-4",
+      kind: "warning",
+      title: `שעת עומס מזוהה · ${HEBREW_DAYS[peakHour.weekday]} · ${peakHour.hour}:00`,
+      detail:
+        "ריכוז גבוה של זמני תגובה ארוכים. שקול הוספת נציג נוסף בחלון הזמן הזה.",
+      metric: `${peakHour.value} דקות תגובה ממוצעות`,
+    },
+    {
+      id: "ins-5",
+      kind: branchScores[0].score >= 85 ? "positive" : "info",
+      title: `${branchScores[0].name} · סניף מוביל ברשת`,
+      detail: `ציון עמידה ב-SLA ${branchScores[0].score}% — ${branchScores[branchScores.length - 1].score}% בסניף הנמוך ביותר. פער של ${branchScores[0].score - branchScores[branchScores.length - 1].score} נק'.`,
+    },
+  ];
+
   return {
     kpis: {
       openTasks,
@@ -185,6 +292,9 @@ export function generateDashboardData(seed = 42): DashboardData {
     recentTasks,
     branches: BRANCHES,
     employees: EMPLOYEES,
+    employeePerformance,
+    slaAlerts,
+    insights,
   };
 }
 

@@ -56,6 +56,37 @@ export type KpiSnapshot = {
   trendOpenTasks: TimeSeriesPoint[];
 };
 
+export type EmployeePerformance = {
+  employeeId: string;
+  name: string;
+  role: string;
+  branchName: string;
+  avatarColor: string;
+  open: number;
+  done: number;
+  avgHandlingMinutes: number;
+  slaScore: number; // 0-100
+  trend: number; // -100..100
+};
+
+export type SLAAlert = {
+  id: string;
+  taskTitle: string;
+  branchName: string;
+  assigneeName: string;
+  severity: "high" | "medium" | "low";
+  minutesOverdue: number;
+  occurredAt: string;
+};
+
+export type AIInsight = {
+  id: string;
+  kind: "positive" | "warning" | "info";
+  title: string;
+  detail: string;
+  metric?: string;
+};
+
 export type DashboardData = {
   kpis: KpiSnapshot;
   tasksOverTime: TimeSeriesPoint[];
@@ -67,4 +98,7 @@ export type DashboardData = {
   recentTasks: Task[];
   branches: Branch[];
   employees: Employee[];
+  employeePerformance: EmployeePerformance[];
+  slaAlerts: SLAAlert[];
+  insights: AIInsight[];
 };

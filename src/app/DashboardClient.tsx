@@ -18,7 +18,10 @@ import { EmptyState } from "@/components/dashboard/EmptyState";
 import { ErrorState } from "@/components/dashboard/ErrorState";
 import { GlobalFilters } from "@/components/filters/GlobalFilters";
 import { TasksTable } from "@/components/tables/TasksTable";
+import { EmployeesTable } from "@/components/tables/EmployeesTable";
 import { DetailDialog } from "@/components/dashboard/DetailDialog";
+import { AIInsights } from "@/components/dashboard/AIInsights";
+import { SLAAlerts } from "@/components/dashboard/SLAAlerts";
 import {
   areaOption,
   branchBarOption,
@@ -186,6 +189,23 @@ export default function DashboardClient() {
           )}
         </ChartCard>
       </section>
+
+      {data && (
+        <section className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+          <div className="lg:col-span-3">
+            <AIInsights insights={data.insights} />
+          </div>
+          <div className="lg:col-span-2">
+            <SLAAlerts alerts={data.slaAlerts} />
+          </div>
+        </section>
+      )}
+
+      {data && (
+        <section>
+          <EmployeesTable rows={data.employeePerformance} />
+        </section>
+      )}
 
       <section>
         <ChartCard
