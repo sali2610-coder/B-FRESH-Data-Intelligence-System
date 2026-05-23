@@ -176,7 +176,10 @@ export function ActivityFeed({
                         <motion.div
                           whileHover={{ x: -2 }}
                           transition={SPRING_SMOOTH}
-                          className="bg-card hover:bg-accent/30 flex items-start gap-2 rounded-xl border border-transparent hover:border-border/60 p-2.5 transition-colors"
+                          className={cn(
+                            "bg-card hover:bg-accent/30 flex items-start gap-2 rounded-xl border border-transparent hover:border-border/60 p-2.5 transition-colors",
+                            ev.severity === "critical" && "live-pulse",
+                          )}
                         >
                           <div className="min-w-0 flex-1 space-y-0.5">
                             <div className="flex items-center gap-1.5">

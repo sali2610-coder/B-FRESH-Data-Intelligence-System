@@ -240,6 +240,138 @@ body {
     linear-gradient(180deg, #061a26, #0a2230 70%);
 }
 
+/* Slow continuous drift on atmosphere — gives "alive" feeling without distraction. */
+@keyframes drift-blob-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(-40px, 30px) scale(1.05); }
+}
+@keyframes drift-blob-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(50px, -25px) scale(0.96); }
+}
+.atmosphere::before { animation: drift-blob-a 22s ease-in-out infinite; }
+.atmosphere::after  { animation: drift-blob-b 26s ease-in-out infinite; }
+
+/* Network pressure — overlay tint shifts based on operational mood.
+   data-pressure on <main> (set by DashboardClient) drives the cast. */
+[data-pressure="critical"] .atmosphere {
+  background:
+    radial-gradient(1400px 700px at 100% -10%, rgba(255,122,107,0.22), transparent 60%),
+    radial-gradient(1000px 600px at -10% 25%, rgba(255,145,102,0.18), transparent 55%),
+    radial-gradient(900px 500px at 50% 110%, rgba(18,169,232,0.10), transparent 55%),
+    linear-gradient(180deg, #fff4f0, #ffffff 70%);
+}
+[data-pressure="warm"] .atmosphere {
+  background:
+    radial-gradient(1400px 700px at 100% -10%, rgba(255,180,84,0.22), transparent 60%),
+    radial-gradient(1000px 600px at -10% 25%, rgba(255,145,102,0.12), transparent 55%),
+    radial-gradient(900px 500px at 50% 110%, rgba(62,213,152,0.10), transparent 55%),
+    linear-gradient(180deg, #fff8ec, #ffffff 70%);
+}
+[data-pressure="ok"] .atmosphere {
+  /* default — keep current ocean wash */
+}
+
+/* Continuous marquee for the live operational ticker. */
+@keyframes ticker-flow {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.ticker-flow {
+  display: inline-flex;
+  animation: ticker-flow 45s linear infinite;
+  will-change: transform;
+}
+[dir="rtl"] .ticker-flow {
+  animation-direction: reverse;
+}
+.ticker-mask {
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 6%,
+    #000 94%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 6%,
+    #000 94%,
+    transparent 100%
+  );
+}
+
+/* Gentle breathing on KPI cards — alive without distraction */
+@keyframes card-breathe {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-2px); }
+}
+.breathe {
+  animation: card-breathe 6s ease-in-out infinite;
+}
+.breathe-slow { animation: card-breathe 9s ease-in-out infinite; }
+.breathe-fast { animation: card-breathe 4s ease-in-out infinite; }
+
+/* Magnetic glow follows pointer — uses --mx/--my CSS vars set by JS */
+.magnetic-glow {
+  position: relative;
+  overflow: hidden;
+}
+.magnetic-glow::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  background: radial-gradient(
+    280px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in oklab, var(--accent-color, var(--bfresh-blue)) 28%, transparent),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  border-radius: inherit;
+}
+.magnetic-glow:hover::before { opacity: 1; }
+
+/* Live pulse band — narrow continuous shimmer used on critical alert rows. */
+@keyframes live-shimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+.live-pulse {
+  position: relative;
+  overflow: hidden;
+}
+.live-pulse::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 3px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    var(--bfresh-coral) 30%,
+    var(--bfresh-coral) 70%,
+    transparent
+  );
+  background-size: 100% 220%;
+  animation: live-shimmer 1.8s linear infinite;
+  border-radius: 999px;
+}
+
+/* Network pulse SVG underlay — drawn under SpotlightCards / Heatmap header */
+@keyframes pulse-line {
+  0%   { stroke-dashoffset: 1000; opacity: 0.3; }
+  50%  { opacity: 0.85; }
+  100% { stroke-dashoffset: 0; opacity: 0.3; }
+}
+.pulse-line {
+  stroke-dasharray: 12 16;
+  animation: pulse-line 8s linear infinite;
+}
+
 /* Premium glass — frosted with brand wash */
 .glass {
   background: linear-gradient(

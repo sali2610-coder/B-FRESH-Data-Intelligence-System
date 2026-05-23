@@ -210,26 +210,39 @@ export function TasksTable({
           ))}
         </thead>
         <tbody>
-          {table.getRowModel().rows.map((row, i) => (
-            <tr
-              key={row.id}
-              onClick={() => onRowClick?.(row.original)}
-              className={cn(
-                "group border-b border-border/30 last:border-0 cursor-pointer transition-colors",
-                i % 2 === 0 ? "bg-transparent" : "bg-muted/[0.18]",
-                "hover:bg-bfresh-blue/[0.05]",
-              )}
-            >
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className={cn("ps-4", rowPad)}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          {table.getRowModel().rows.map((row, i) => {
+            const t = row.original;
+            const edge =
+              t.slaState === "breached"
+                ? "before:bg-bfresh-coral"
+                : t.slaState === "at_risk"
+                  ? "before:bg-tone-warm"
+                  : t.status === "done"
+                    ? "before:bg-bfresh-fresh-green"
+                    : "before:bg-bfresh-blue/40";
+            return (
+              <tr
+                key={row.id}
+                onClick={() => onRowClick?.(row.original)}
+                className={cn(
+                  "group relative border-b border-border/30 last:border-0 cursor-pointer transition-colors",
+                  "before:absolute before:inset-y-1.5 before:start-0 before:w-[3px] before:rounded-full",
+                  edge,
+                  i % 2 === 0 ? "bg-transparent" : "bg-muted/[0.18]",
+                  "hover:bg-bfresh-blue/[0.05]",
+                )}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id} className={cn("ps-4", rowPad)}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+                <td className={cn("pe-4 text-end", rowPad)}>
+                  <ChevronLeft className="text-muted-foreground/70 group-hover:text-bfresh-blue inline size-4 transition-all -translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-100" />
                 </td>
-              ))}
-              <td className={cn("pe-4 text-end", rowPad)}>
-                <ChevronLeft className="text-muted-foreground/70 group-hover:text-bfresh-blue inline size-4 transition-all -translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-100" />
-              </td>
-            </tr>
-          ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

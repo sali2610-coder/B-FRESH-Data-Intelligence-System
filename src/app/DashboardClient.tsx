@@ -29,6 +29,8 @@ import { NetworkHeatmap } from "@/components/cockpit/NetworkHeatmap";
 import { ActivityFeed } from "@/components/cockpit/ActivityFeed";
 import { SpotlightCards } from "@/components/cockpit/SpotlightCards";
 import { AICopilotRail } from "@/components/cockpit/AICopilotRail";
+import { LiveTicker } from "@/components/cockpit/LiveTicker";
+import { useEffect } from "react";
 import {
   areaOption,
   donutOption,
@@ -64,6 +66,25 @@ export default function DashboardClient() {
   const franchiseLeads =
     data?.activity.filter((a) => a.kind === "franchise_lead").length ?? 0;
 
+  // ── Operational mood — drives the page atmosphere tint ──
+  const criticalCount =
+    data?.activity.filter((a) => a.severity === "critical").length ?? 0;
+  const highCount =
+    data?.activity.filter((a) => a.severity === "high").length ?? 0;
+  const mood: "critical" | "warm" | "ok" =
+    criticalCount >= 3 || (data?.networkScore ?? 100) < 65
+      ? "critical"
+      : highCount >= 5 || (data?.networkScore ?? 100) < 78
+        ? "warm"
+        : "ok";
+
+  useEffect(() => {
+    const main = document.querySelector("main");
+    if (!main) return;
+    main.setAttribute("data-pressure", mood);
+    return () => main.removeAttribute("data-pressure");
+  }, [mood]);
+
   return (
     <div className="grid grid-cols-1 gap-[var(--density-section-gap,1.5rem)] xl:grid-cols-[1fr_360px]">
       {/* MAIN COLUMN */}
@@ -74,6 +95,9 @@ export default function DashboardClient() {
           slaCompliancePct={slaLatest}
           loading={loading}
         />
+
+        {/* ── Band 1.5: Live operational ticker ── */}
+        {data && <LiveTicker events={data.activity} />}
 
         {/* ── Band 2: Urgent rail ── */}
         {data && <UrgentAlertsRail events={data.activity} />}

@@ -1,11 +1,11 @@
 "use client";
 
+import { useCallback, useRef, type CSSProperties } from "react";
 import { motion } from "framer-motion";
 import NumberFlow from "@number-flow/react";
 import type { LucideIcon } from "lucide-react";
 import { TrendingUp, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Sparkline } from "@/components/charts/Sparkline";
 import { SPRING_BOUNCE, SPRING_SMOOTH, enterUp } from "@/lib/motion";
 
@@ -111,9 +111,26 @@ export function KpiCard({
 }: KpiCardProps) {
   const a = accent[tone];
   const showNumeric = typeof numericValue === "number";
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  // Magnetic pointer-tracking glow — sets CSS vars used by .magnetic-glow
+  const onPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    const el = ref.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const mx = ((e.clientX - rect.left) / rect.width) * 100;
+    const my = ((e.clientY - rect.top) / rect.height) * 100;
+    el.style.setProperty("--mx", `${mx}%`);
+    el.style.setProperty("--my", `${my}%`);
+  }, []);
+
+  const breatheClass =
+    index % 3 === 0 ? "breathe" : index % 3 === 1 ? "breathe-slow" : "breathe-fast";
 
   return (
     <motion.div
+      ref={ref}
+      onPointerMove={onPointerMove}
       variants={enterUp(index)}
       initial="hidden"
       animate="visible"
@@ -122,9 +139,11 @@ export function KpiCard({
       onClick={onClick}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : -1}
+      style={{ "--accent-color": a.spark } as CSSProperties}
       className={cn(
-        "premium-card group relative overflow-hidden p-[var(--density-card-padding,1.25rem)] transition-shadow",
+        "premium-card magnetic-glow group relative overflow-hidden p-[var(--density-card-padding,1.25rem)] transition-shadow",
         a.glowClass,
+        breatheClass,
         onClick && "cursor-pointer",
       )}
     >

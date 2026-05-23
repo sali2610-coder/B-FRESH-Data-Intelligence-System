@@ -30,8 +30,30 @@ export function NetworkHeatmap({
   };
 
   return (
-    <Card className="premium-card overflow-hidden border-0 bg-transparent shadow-none">
-      <CardHeader className="border-border/50 flex-row items-center justify-between border-b pb-4">
+    <Card className="premium-card relative overflow-hidden border-0 bg-transparent shadow-none">
+      {/* Network pulse waveform under header — continuous motion */}
+      <svg
+        aria-hidden
+        viewBox="0 0 1200 80"
+        preserveAspectRatio="none"
+        className="pointer-events-none absolute inset-x-0 top-12 h-14 w-full opacity-30"
+      >
+        <defs>
+          <linearGradient id="netpulse" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="transparent" />
+            <stop offset="50%" stopColor="#12a9e8" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="transparent" />
+          </linearGradient>
+        </defs>
+        <path
+          d="M0,40 C150,10 300,70 450,40 C600,10 750,70 900,40 C1050,10 1200,70 1200,40"
+          fill="none"
+          stroke="url(#netpulse)"
+          strokeWidth="1.2"
+          className="pulse-line"
+        />
+      </svg>
+      <CardHeader className="border-border/50 relative flex-row items-center justify-between border-b pb-4">
         <div className="flex items-center gap-3">
           <div className="from-bfresh-blue to-bfresh-fresh-green grid size-10 place-items-center rounded-2xl bg-gradient-to-br text-white shadow-md ring-1 ring-white/30">
             <MapPin className="size-4" />

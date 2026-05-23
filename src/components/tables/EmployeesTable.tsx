@@ -59,7 +59,13 @@ export function EmployeesTable({ rows }: { rows: EmployeePerformance[] }) {
                     ease: [0.22, 1, 0.36, 1],
                   }}
                   className={cn(
-                    "group border-b border-border/30 last:border-0 transition-colors",
+                    "group relative border-b border-border/30 last:border-0 transition-colors",
+                    "before:absolute before:inset-y-1.5 before:start-0 before:w-[3px] before:rounded-full",
+                    r.slaScore >= 85
+                      ? "before:bg-bfresh-fresh-green"
+                      : r.slaScore >= 70
+                        ? "before:bg-tone-warm"
+                        : "before:bg-bfresh-coral",
                     i % 2 === 0 ? "bg-transparent" : "bg-muted/[0.18]",
                     "hover:bg-bfresh-blue/[0.04]",
                   )}
