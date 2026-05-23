@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useDashboard } from "@/hooks/useDashboard";
+import { HeroSummary } from "@/components/dashboard/HeroSummary";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { ChartCard } from "@/components/charts/ChartCard";
 import { EChart } from "@/components/charts/EChart";
@@ -46,83 +47,94 @@ export default function DashboardClient() {
   }
 
   const loading = isLoading || !data;
+  const slaLatest = data?.slaCompliance.slice(-1)[0]?.value ?? 0;
+  const sparkTasks = data?.tasksOverTime.slice(-14).map((p) => p.value) ?? [];
+  const sparkSLA = data?.slaCompliance.slice(-14).map((p) => p.value) ?? [];
 
   return (
     <div className="space-y-6">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-extrabold tracking-tight md:text-3xl">
-          מרכז הבקרה התפעולי
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          תמונת מצב חיה של רשת B-FRESH — משימות, SLA, סניפים ועובדים בזמן אמת.
-        </p>
-      </header>
+      <HeroSummary
+        openTasks={data?.kpis.openTasks ?? 0}
+        slaCompliancePct={slaLatest}
+        loading={loading}
+      />
 
       {data && (
         <GlobalFilters branches={data.branches} employees={data.employees} />
       )}
 
-      <section className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+      {/* KPI Row */}
+      <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <KpiCard
           index={0}
           label="משימות פתוחות"
-          value={loading ? "—" : fmtNumber(data.kpis.openTasks)}
+          value="—"
+          numericValue={data?.kpis.openTasks}
           icon={Activity}
           accent="blue"
           loading={loading}
           trend={{ value: 4.2, positive: false }}
+          sparkline={sparkTasks}
+          hint="כולל בטיפול ובהמתנה"
         />
         <KpiCard
           index={1}
           label="חריגות SLA"
-          value={loading ? "—" : fmtNumber(data.kpis.slaBreaches)}
+          value="—"
+          numericValue={data?.kpis.slaBreaches}
           icon={AlertOctagon}
           accent="rose"
           loading={loading}
           trend={{ value: 12, positive: false }}
+          badge={{ label: "דרוש מענה", tone: "bad" }}
         />
         <KpiCard
           index={2}
           label="זמן טיפול ממוצע"
-          value={loading ? "—" : fmtDuration(data.kpis.avgHandlingMinutes)}
+          value={data ? fmtDuration(data.kpis.avgHandlingMinutes) : "—"}
           icon={Timer}
           accent="amber"
           loading={loading}
           trend={{ value: 8.1, positive: true }}
+          hint="ירידה לעומת חודש קודם"
         />
         <KpiCard
           index={3}
           label="הושלמו היום"
-          value={loading ? "—" : fmtNumber(data.kpis.completedToday)}
+          value="—"
+          numericValue={data?.kpis.completedToday}
           icon={CheckCircle2}
           accent="green"
           loading={loading}
           trend={{ value: 18, positive: true }}
+          sparkline={sparkSLA}
+          badge={{ label: "מעולה", tone: "good" }}
         />
         <KpiCard
           index={4}
           label="סניף מוביל"
-          value={loading ? "—" : data.kpis.topBranch.name}
-          hint={loading ? undefined : `ציון SLA · ${data.kpis.topBranch.score}%`}
+          value={data?.kpis.topBranch.name ?? "—"}
           icon={Crown}
           accent="violet"
           loading={loading}
+          hint={data ? `ציון SLA · ${data.kpis.topBranch.score}%` : undefined}
         />
         <KpiCard
           index={5}
           label="עובד מצטיין"
-          value={loading ? "—" : data.kpis.topEmployee.name}
-          hint={
-            loading
-              ? undefined
-              : `${fmtNumber(data.kpis.topEmployee.score)} משימות הושלמו`
-          }
+          value={data?.kpis.topEmployee.name ?? "—"}
           icon={Star}
           accent="cyan"
           loading={loading}
+          hint={
+            data
+              ? `${fmtNumber(data.kpis.topEmployee.score)} משימות הושלמו`
+              : undefined
+          }
         />
       </section>
 
+      {/* Charts grid */}
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <ChartCard
           index={0}
@@ -162,9 +174,10 @@ export default function DashboardClient() {
           subtitle="היטמפ ניתוח עומסים"
           loading={loading}
           className="lg:col-span-2"
+          minHeight={320}
         >
           {data && (
-            <EChart option={heatmapOption(data.responseHeatmap)} height={280} />
+            <EChart option={heatmapOption(data.responseHeatmap)} height={300} />
           )}
         </ChartCard>
 
@@ -183,6 +196,7 @@ export default function DashboardClient() {
           subtitle="ציון עמידה ב-SLA"
           loading={loading}
           className="lg:col-span-2"
+          minHeight={320}
         >
           {data && (
             <EChart option={branchBarOption(data.branchRanking)} height={300} />
@@ -190,29 +204,33 @@ export default function DashboardClient() {
         </ChartCard>
       </section>
 
+      {/* Intelligence row */}
       {data && (
-        <section className="grid grid-cols-1 gap-4 lg:grid-cols-5">
-          <div className="lg:col-span-3">
+        <section className="grid grid-cols-1 gap-4 xl:grid-cols-5">
+          <div className="xl:col-span-3">
             <AIInsights insights={data.insights} />
           </div>
-          <div className="lg:col-span-2">
+          <div className="xl:col-span-2">
             <SLAAlerts alerts={data.slaAlerts} />
           </div>
         </section>
       )}
 
+      {/* Employees ranking */}
       {data && (
         <section>
           <EmployeesTable rows={data.employeePerformance} />
         </section>
       )}
 
+      {/* Recent tasks */}
       <section>
         <ChartCard
           index={6}
           title="משימות אחרונות"
-          subtitle="לחץ על שורה לפרטים"
+          subtitle="לחץ על שורה לפתיחת פירוט"
           loading={loading}
+          minHeight={420}
         >
           {data && (
             <TasksTable

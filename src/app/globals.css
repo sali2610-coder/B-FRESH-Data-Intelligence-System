@@ -139,8 +139,129 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 ::selection {
   background: color-mix(in oklab, var(--bfresh-blue) 30%, transparent);
+}
+
+/* Premium page atmosphere — radial brand glow + soft blobs */
+.atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      1200px 600px at 100% -10%,
+      color-mix(in oklab, var(--bfresh-light-blue) 35%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      900px 500px at -10% 30%,
+      color-mix(in oklab, var(--bfresh-fresh-green) 22%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      800px 400px at 50% 100%,
+      color-mix(in oklab, var(--bfresh-blue) 18%, transparent),
+      transparent 55%
+    );
+}
+
+.atmosphere::before,
+.atmosphere::after {
+  content: "";
+  position: absolute;
+  width: 480px;
+  height: 480px;
+  border-radius: 999px;
+  filter: blur(80px);
+  opacity: 0.45;
+}
+
+.atmosphere::before {
+  top: -120px;
+  right: -120px;
+  background: var(--bfresh-light-blue);
+}
+
+.atmosphere::after {
+  bottom: -180px;
+  left: -120px;
+  background: var(--bfresh-fresh-green);
+  opacity: 0.32;
+}
+
+.dark .atmosphere {
+  background:
+    radial-gradient(1200px 600px at 100% -10%, oklch(0.35 0.1 235 / 0.4), transparent 60%),
+    radial-gradient(900px 500px at -10% 30%, oklch(0.4 0.1 155 / 0.25), transparent 55%);
+}
+
+/* Premium glass card */
+.glass {
+  background: color-mix(in oklab, var(--card) 70%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+}
+
+/* Premium scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--bfresh-blue) 30%, transparent) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--bfresh-blue) 30%, transparent);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in oklab, var(--bfresh-blue) 55%, transparent);
+  background-clip: padding-box;
+}
+
+/* Subtle elevation utility */
+.elev-1 {
+  box-shadow:
+    0 1px 2px oklch(0 0 0 / 0.04),
+    0 4px 16px oklch(0 0 0 / 0.04);
+}
+.elev-2 {
+  box-shadow:
+    0 2px 4px oklch(0 0 0 / 0.05),
+    0 12px 32px oklch(0 0 0 / 0.06);
+}
+
+/* Animated hover lift used on premium cards */
+.lift {
+  transition:
+    transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.lift:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 4px 8px oklch(0 0 0 / 0.06),
+    0 18px 40px oklch(0 0 0 / 0.08);
+}
+
+/* Brand-gradient text utility */
+.brand-text {
+  background: linear-gradient(
+    90deg,
+    var(--bfresh-blue),
+    var(--bfresh-fresh-green)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }

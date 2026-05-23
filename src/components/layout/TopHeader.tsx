@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Menu, Search, RefreshCw, Wifi } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
+import { Menu, Search, RefreshCw, Wifi, Bell } from "lucide-react";
+import { useQueryClient, useIsFetching } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,9 +20,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Badge } from "@/components/ui/badge";
 import { Sidebar } from "./Sidebar";
 import { LiveClock } from "./LiveClock";
+import { cn } from "@/lib/utils";
 
 const BOARDS = [
   { id: "ops", label: "תפעול ראשי" },
@@ -33,6 +33,7 @@ const BOARDS = [
 
 export function TopHeader() {
   const qc = useQueryClient();
+  const fetching = useIsFetching();
   const [board, setBoard] = useState("ops");
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -42,8 +43,8 @@ export function TopHeader() {
   };
 
   return (
-    <header className="bg-background/80 supports-[backdrop-filter]:bg-background/60 border-border sticky top-0 z-30 border-b backdrop-blur">
-      <div className="flex h-16 items-center gap-3 px-4 md:px-6">
+    <header className="bg-background/60 supports-[backdrop-filter]:bg-background/45 border-border/60 sticky top-0 z-30 border-b backdrop-blur-xl">
+      <div className="mx-auto flex h-16 max-w-[1600px] items-center gap-3 px-4 md:px-6 lg:px-8">
         <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
           <SheetTrigger
             render={
@@ -61,18 +62,31 @@ export function TopHeader() {
           </SheetContent>
         </Sheet>
 
+        {/* Mobile compact brand */}
+        <div className="flex items-center gap-2 lg:hidden">
+          <div className="from-bfresh-blue to-bfresh-fresh-green grid size-8 place-items-center rounded-xl bg-gradient-to-br text-white text-sm font-black">
+            B
+          </div>
+          <span className="text-sm font-extrabold tracking-tight">B-FRESH</span>
+        </div>
+
+        {/* Search */}
         <div className="relative hidden flex-1 items-center md:flex">
           <Search className="text-muted-foreground pointer-events-none absolute right-3 size-4" />
           <Input
             type="search"
-            placeholder="חיפוש משימה, עובד, סניף…"
-            className="bg-muted/40 h-10 rounded-xl border-transparent ps-3 pe-9"
+            placeholder="חיפוש משימה, עובד, סניף, מספר פריט…"
+            className="bg-muted/40 focus:bg-card focus:ring-bfresh-blue/30 h-10 rounded-xl border-transparent ps-3 pe-9 transition-all focus:ring-2"
           />
+          <kbd className="text-muted-foreground bg-background border-border absolute start-2.5 hidden rounded border px-1.5 py-0.5 text-[10px] font-mono md:block">
+            ⌘K
+          </kbd>
         </div>
 
-        <div className="ms-auto flex items-center gap-2 md:gap-3">
+        {/* Right cluster */}
+        <div className="ms-auto flex items-center gap-1.5 md:gap-2.5">
           <Select value={board} onValueChange={(v) => v && setBoard(v)}>
-            <SelectTrigger className="hidden h-10 w-44 rounded-xl md:flex">
+            <SelectTrigger className="bg-muted/40 hidden h-10 w-44 rounded-xl border-transparent md:flex">
               <SelectValue placeholder="בחר לוח" />
             </SelectTrigger>
             <SelectContent>
@@ -84,16 +98,25 @@ export function TopHeader() {
             </SelectContent>
           </Select>
 
-          <Badge
-            variant="outline"
-            className="border-bfresh-fresh-green/40 text-bfresh-fresh-green hidden gap-1.5 rounded-full py-1.5 md:flex"
-          >
-            <span className="bg-bfresh-fresh-green inline-block size-2 animate-pulse rounded-full" />
-            <Wifi className="size-3.5" />
+          <div className="bg-bfresh-fresh-green/10 text-bfresh-fresh-green hidden items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold md:flex">
+            <span className="bg-bfresh-fresh-green relative inline-flex size-2 rounded-full">
+              <span className="bg-bfresh-fresh-green absolute inset-0 animate-ping rounded-full opacity-75" />
+            </span>
+            <Wifi className="size-3" />
             מחובר · דמה
-          </Badge>
+          </div>
 
           <LiveClock />
+
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="התראות"
+            className="relative rounded-xl"
+          >
+            <Bell className="size-4" />
+            <span className="bg-rose-500 absolute right-2 top-2 size-2 rounded-full" />
+          </Button>
 
           <Button
             variant="ghost"
@@ -102,7 +125,9 @@ export function TopHeader() {
             aria-label="רענון"
             className="rounded-xl"
           >
-            <RefreshCw className="size-4" />
+            <RefreshCw
+              className={cn("size-4", fetching > 0 && "animate-spin")}
+            />
           </Button>
         </div>
       </div>

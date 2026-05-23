@@ -9,17 +9,9 @@ import {
   type ColumnDef,
   type SortingState,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ExternalLink } from "lucide-react";
+import { ArrowUpDown, ChevronLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { fmtDuration, fmtRelative } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Branch, Employee, Task, TaskStatus, SLAState } from "@/types/domain";
@@ -32,10 +24,10 @@ const STATUS_LABEL: Record<TaskStatus, string> = {
 };
 
 const STATUS_CLASS: Record<TaskStatus, string> = {
-  open: "bg-blue-500/10 text-blue-700 border-blue-500/20",
-  in_progress: "bg-amber-500/10 text-amber-700 border-amber-500/20",
-  blocked: "bg-rose-500/10 text-rose-700 border-rose-500/20",
-  done: "bg-emerald-500/10 text-emerald-700 border-emerald-500/20",
+  open: "bg-blue-500/10 text-blue-700 border-blue-500/25",
+  in_progress: "bg-amber-500/10 text-amber-700 border-amber-500/25",
+  blocked: "bg-rose-500/10 text-rose-700 border-rose-500/25",
+  done: "bg-emerald-500/10 text-emerald-700 border-emerald-500/25",
 };
 
 const SLA_LABEL: Record<SLAState, string> = {
@@ -45,9 +37,9 @@ const SLA_LABEL: Record<SLAState, string> = {
 };
 
 const SLA_CLASS: Record<SLAState, string> = {
-  ok: "bg-emerald-500/10 text-emerald-700 border-emerald-500/20",
-  at_risk: "bg-amber-500/10 text-amber-700 border-amber-500/20",
-  breached: "bg-rose-500/10 text-rose-700 border-rose-500/20",
+  ok: "bg-emerald-500/10 text-emerald-700 border-emerald-500/25",
+  at_risk: "bg-amber-500/10 text-amber-700 border-amber-500/25",
+  breached: "bg-rose-500/10 text-rose-700 border-rose-500/25",
 };
 
 export function TasksTable({
@@ -80,9 +72,9 @@ export function TasksTable({
         accessorKey: "title",
         header: "משימה",
         cell: ({ row }) => (
-          <div className="flex flex-col">
-            <span className="font-medium">{row.original.title}</span>
-            <span className="text-muted-foreground text-[11px]">
+          <div className="flex flex-col leading-tight">
+            <span className="font-semibold truncate">{row.original.title}</span>
+            <span className="text-muted-foreground text-[11px] tabular-nums">
               #{row.original.mondayItemId}
             </span>
           </div>
@@ -91,7 +83,11 @@ export function TasksTable({
       {
         accessorKey: "branchId",
         header: "סניף",
-        cell: ({ row }) => branchMap[row.original.branchId]?.name ?? "—",
+        cell: ({ row }) => (
+          <span className="text-xs font-medium">
+            {branchMap[row.original.branchId]?.name ?? "—"}
+          </span>
+        ),
       },
       {
         accessorKey: "assigneeId",
@@ -102,12 +98,12 @@ export function TasksTable({
           return (
             <div className="flex items-center gap-2">
               <span
-                className="grid size-6 place-items-center rounded-full text-[10px] font-bold text-white"
+                className="grid size-7 place-items-center rounded-full text-[10px] font-black text-white ring-2 ring-white shadow-sm"
                 style={{ backgroundColor: e.avatarColor }}
               >
                 {e.name.slice(0, 1)}
               </span>
-              <span className="text-xs">{e.name}</span>
+              <span className="text-xs font-medium">{e.name}</span>
             </div>
           );
         },
@@ -118,7 +114,10 @@ export function TasksTable({
         cell: ({ row }) => (
           <Badge
             variant="outline"
-            className={cn("rounded-full", STATUS_CLASS[row.original.status])}
+            className={cn(
+              "rounded-full font-bold text-[11px]",
+              STATUS_CLASS[row.original.status],
+            )}
           >
             {STATUS_LABEL[row.original.status]}
           </Badge>
@@ -130,7 +129,10 @@ export function TasksTable({
         cell: ({ row }) => (
           <Badge
             variant="outline"
-            className={cn("rounded-full", SLA_CLASS[row.original.slaState])}
+            className={cn(
+              "rounded-full font-bold text-[11px]",
+              SLA_CLASS[row.original.slaState],
+            )}
           >
             {SLA_LABEL[row.original.slaState]}
           </Badge>
@@ -139,10 +141,13 @@ export function TasksTable({
       {
         accessorKey: "handlingMinutes",
         header: "זמן טיפול",
-        cell: ({ row }) =>
-          row.original.handlingMinutes
-            ? fmtDuration(row.original.handlingMinutes)
-            : "—",
+        cell: ({ row }) => (
+          <span className="text-muted-foreground text-xs tabular-nums">
+            {row.original.handlingMinutes
+              ? fmtDuration(row.original.handlingMinutes)
+              : "—"}
+          </span>
+        ),
       },
       {
         accessorKey: "createdAt",
@@ -167,49 +172,52 @@ export function TasksTable({
   });
 
   return (
-    <div className="overflow-hidden rounded-xl border">
-      <Table>
-        <TableHeader>
+    <div className="border-border/60 max-h-[560px] overflow-auto rounded-2xl border">
+      <table className="w-full min-w-[820px] text-sm">
+        <thead className="bg-muted/50 sticky top-0 z-10 backdrop-blur-md">
           {table.getHeaderGroups().map((hg) => (
-            <TableRow key={hg.id} className="bg-muted/40">
+            <tr key={hg.id} className="border-b border-border/50">
               {hg.headers.map((h) => (
-                <TableHead key={h.id} className="text-start">
+                <th
+                  key={h.id}
+                  className="py-3 ps-4 text-start text-[10.5px] uppercase tracking-wider"
+                >
                   {h.isPlaceholder ? null : (
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={h.column.getToggleSortingHandler()}
-                      className="h-8 -ms-2 gap-1 text-xs font-semibold"
+                      className="text-muted-foreground hover:text-foreground -ms-2 h-7 gap-1 font-bold"
                     >
                       {flexRender(h.column.columnDef.header, h.getContext())}
                       <ArrowUpDown className="size-3 opacity-50" />
                     </Button>
                   )}
-                </TableHead>
+                </th>
               ))}
-              <TableHead />
-            </TableRow>
+              <th />
+            </tr>
           ))}
-        </TableHeader>
-        <TableBody>
+        </thead>
+        <tbody>
           {table.getRowModel().rows.map((row) => (
-            <TableRow
+            <tr
               key={row.id}
               onClick={() => onRowClick?.(row.original)}
-              className="hover:bg-accent/30 cursor-pointer"
+              className="hover:bg-accent/30 group border-b border-border/40 last:border-0 cursor-pointer transition-colors"
             >
               {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id} className="py-2.5">
+                <td key={cell.id} className="py-3 ps-4">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
+                </td>
               ))}
-              <TableCell className="py-2.5">
-                <ExternalLink className="text-muted-foreground size-3.5" />
-              </TableCell>
-            </TableRow>
+              <td className="py-3 pe-4 text-end">
+                <ChevronLeft className="text-muted-foreground inline size-4 transition-transform group-hover:-translate-x-0.5" />
+              </td>
+            </tr>
           ))}
-        </TableBody>
-      </Table>
+        </tbody>
+      </table>
     </div>
   );
 }
