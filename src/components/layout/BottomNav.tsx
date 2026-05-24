@@ -7,7 +7,7 @@ import {
   LayoutDashboard,
   Building2,
   Sparkles,
-  Activity,
+  MessageSquare,
   MoreHorizontal,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -18,6 +18,12 @@ type Tab = { href: string; label: string; icon: LucideIcon; match?: (p: string) 
 
 const TABS: Tab[] = [
   { href: "/", label: "מרכז", icon: LayoutDashboard, match: (p) => p === "/" },
+  {
+    href: "/complaints",
+    label: "תלונות",
+    icon: MessageSquare,
+    match: (p) => p.startsWith("/complaints"),
+  },
   {
     href: "/branches",
     label: "סניפים",
@@ -31,16 +37,13 @@ const TABS: Tab[] = [
     match: (p) => p.startsWith("/insights"),
   },
   {
-    href: "/sla",
-    label: "SLA",
-    icon: Activity,
-    match: (p) => p.startsWith("/sla"),
-  },
-  {
     href: "/forms",
     label: "עוד",
     icon: MoreHorizontal,
-    match: (p) => p.startsWith("/forms") || p.startsWith("/employees"),
+    match: (p) =>
+      p.startsWith("/forms") ||
+      p.startsWith("/employees") ||
+      p.startsWith("/sla"),
   },
 ];
 
