@@ -9,19 +9,24 @@
 
 import type { EntityType } from "@/domain";
 
-/** Internal entity types that Monday boards can map to. */
-export type BoardEntityType = Extract<
-  EntityType,
-  | "complaint"
-  | "maintenance"
-  | "inspection"
-  | "marketing_campaign"
-  | "recruitment_lead"
-  | "franchise_lead"
->;
+/** Internal entity types that Monday boards can map to.
+ *  `ticket` is a generic alias for `complaint` — same domain shape, used
+ *  for general CS / operations tickets that aren't strictly customer
+ *  complaints. */
+export type BoardEntityType =
+  | Extract<
+      EntityType,
+      | "complaint"
+      | "maintenance"
+      | "inspection"
+      | "marketing_campaign"
+      | "recruitment_lead"
+      | "franchise_lead"
+    >
+  | "ticket";
 
 export type BoardDepartment =
-  | "customer-service"
+  | "customer_service"
   | "maintenance"
   | "marketing"
   | "recruitment"
@@ -114,7 +119,41 @@ export type MondayBoardConfig = {
  *   enabled: true,
  * }
  */
-export const MONDAY_BOARDS: MondayBoardConfig[] = [];
+export const MONDAY_BOARDS: MondayBoardConfig[] = [
+  {
+    id: "1243625185",
+    name: "תלונות",
+    department: "customer_service",
+    entityType: "complaint",
+    description: "תלונות לקוחות נכנסות",
+    columns: {
+      // Fill after inspecting /api/monday/board/1243625185
+    },
+    enabled: false,
+  },
+  {
+    id: "2033091739",
+    name: "שירות לקוחות",
+    department: "customer_service",
+    entityType: "ticket",
+    description: "פניות שירות לקוחות כלליות",
+    columns: {
+      // Fill after inspecting /api/monday/board/2033091739
+    },
+    enabled: false,
+  },
+  {
+    id: "1817371303",
+    name: "זכיינים פוטנציאלים",
+    department: "franchise",
+    entityType: "franchise_lead",
+    description: "פייפליין מועמדי זכיינות",
+    columns: {
+      // Fill after inspecting /api/monday/board/1817371303
+    },
+    enabled: false,
+  },
+];
 
 export function getEnabledBoards(): MondayBoardConfig[] {
   return MONDAY_BOARDS.filter((b) => b.enabled !== false);

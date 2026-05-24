@@ -294,6 +294,9 @@ export function mapToEntity(
 ): MappedEntity {
   switch (board.entityType) {
     case "complaint":
+    case "ticket":
+      // 'ticket' is treated as a generic ComplaintEntity for now —
+      // same domain shape, different semantic origin.
       return toComplaint(ticket, board);
     case "maintenance":
       return toMaintenance(ticket, board);

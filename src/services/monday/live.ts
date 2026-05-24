@@ -64,6 +64,61 @@ export async function liveGetBoardMeta(
   return data.boards?.[0] ?? null;
 }
 
+/**
+ * Returns board meta + a few sample items so an operator can
+ * eyeball the column IDs to map. Used by the inspection route.
+ */
+export type BoardInspection = {
+  meta: MondayBoardMeta;
+  sampleItems: {
+    id: string;
+    name: string;
+    group: string | null;
+    columns: {
+      id: string;
+      title: string;
+      type: string;
+      text: string | null;
+      value: string | null;
+    }[];
+  }[];
+};
+
+export async function liveGetBoardInspection(
+  boardId: string,
+  sampleLimit = 5,
+): Promise<BoardInspection | null> {
+  const [meta, itemsData] = await Promise.all([
+    liveGetBoardMeta(boardId),
+    mondayRequest<BoardItemsResponse>(BOARD_ITEMS_QUERY, {
+      variables: { boardId: [boardId], cursor: null, limit: sampleLimit },
+    }),
+  ]);
+  if (!meta) return null;
+  const colMeta = new Map(
+    meta.columns.map((c) => [c.id, { title: c.title, type: c.type }]),
+  );
+  const items = itemsData.boards?.[0]?.items_page?.items ?? [];
+  return {
+    meta,
+    sampleItems: items.map((it) => ({
+      id: it.id,
+      name: it.name,
+      group: it.group?.title ?? null,
+      columns: it.column_values.map((c) => {
+        const m = colMeta.get(c.id);
+        return {
+          id: c.id,
+          title: m?.title ?? c.id,
+          type: m?.type ?? c.type,
+          text: c.text,
+          value: c.value,
+        };
+      }),
+    })),
+  };
+}
+
 export async function liveGetTickets(
   boardIds?: string[],
 ): Promise<NormalizedTicket[]> {
