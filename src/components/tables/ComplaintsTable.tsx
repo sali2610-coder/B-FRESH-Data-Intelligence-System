@@ -47,10 +47,12 @@ export function ComplaintsTable({
   complaints,
   employees,
   onRowClick,
+  onOwnerClick,
 }: {
   complaints: ComplaintEntity[] | null | undefined;
   employees: Pick<EmployeeEntity, "id" | "name" | "avatarColor">[] | null | undefined;
   onRowClick?: (complaint: ComplaintEntity) => void;
+  onOwnerClick?: (ownerId: string) => void;
 }) {
   const density = useUI((s) => s.density);
   const compact = density === "compact";
@@ -154,7 +156,15 @@ export function ComplaintsTable({
                 </td>
                 <td className={cn("ps-4", rowPad)}>
                   {emp ? (
-                    <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onOwnerClick && c.assigneeId)
+                          onOwnerClick(c.assigneeId);
+                      }}
+                      className="hover:bg-bfresh-blue/[0.08] -mx-1 inline-flex items-center gap-2 rounded-lg px-1 py-0.5 transition-colors"
+                    >
                       <span
                         className="grid size-7 place-items-center rounded-full text-[10px] font-black text-white ring-2 ring-white shadow-sm"
                         style={{ backgroundColor: emp.avatarColor ?? "#12a9e8" }}
@@ -162,7 +172,7 @@ export function ComplaintsTable({
                         {emp.name.slice(0, 1)}
                       </span>
                       <span className="text-xs font-medium">{emp.name}</span>
-                    </div>
+                    </button>
                   ) : (
                     <span className="text-muted-foreground text-xs">—</span>
                   )}

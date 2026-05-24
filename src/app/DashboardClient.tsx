@@ -32,6 +32,8 @@ import { AICopilotRail } from "@/components/cockpit/AICopilotRail";
 import { LiveTicker } from "@/components/cockpit/LiveTicker";
 import { NarrativeBar } from "@/components/cockpit/NarrativeBar";
 import { ComplaintPulse } from "@/components/cockpit/ComplaintPulse";
+import { OwnerDrillPanel } from "@/components/cockpit/OwnerDrillPanel";
+import { useComplaints } from "@/hooks/useComplaints";
 import { useEffect } from "react";
 import {
   areaOption,
@@ -46,6 +48,8 @@ import type { Task } from "@/types/domain";
 export default function DashboardClient() {
   const { data, isLoading, isError, refetch } = useDashboard();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [drillOwner, setDrillOwner] = useState<string | null>(null);
+  const { data: complaintsData } = useComplaints();
 
   if (isError) {
     return (
@@ -126,6 +130,7 @@ export default function DashboardClient() {
           <ComplaintPulse
             metrics={data.complaintMetrics}
             employees={data.employees}
+            onOwnerClick={(id) => setDrillOwner(id)}
           />
         )}
 
@@ -339,6 +344,13 @@ export default function DashboardClient() {
             onOpenChange={(o) => !o && setSelectedTask(null)}
           />
         )}
+
+        <OwnerDrillPanel
+          ownerId={drillOwner}
+          complaints={complaintsData?.complaints}
+          employees={complaintsData?.employees ?? data?.employees}
+          onOpenChange={(o) => !o && setDrillOwner(null)}
+        />
       </div>
 
       {/* RIGHT RAIL: AI Copilot — xl+ sticky, smaller as floating sheet */}

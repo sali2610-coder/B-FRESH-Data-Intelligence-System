@@ -108,6 +108,10 @@ export type ComplaintMetrics = {
     total: number;
     open: number;
     overdue: number;
+    /** % of this owner's done tickets that closed within SLA. */
+    slaScore: number;
+    /** Average resolution minutes across this owner's done tickets. */
+    avgResolutionMinutes: number;
   }[];
   byDate: { date: string; count: number }[]; // 30d
   byStatus: { status: string; count: number }[];

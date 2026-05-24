@@ -542,17 +542,52 @@ export function computeComplaintMetrics(
   ).length;
   const overdue = complaints.filter((c) => c.slaState === "breached").length;
 
-  const ownerMap = new Map<string, { open: number; overdue: number; total: number }>();
+  type OwnerAgg = {
+    open: number;
+    overdue: number;
+    total: number;
+    doneCount: number;
+    doneOnTime: number;
+    handlingTotal: number;
+  };
+  const ownerMap = new Map<string, OwnerAgg>();
   for (const c of complaints) {
     const key = c.assigneeId ?? "unassigned";
-    const cur = ownerMap.get(key) ?? { open: 0, overdue: 0, total: 0 };
+    const cur =
+      ownerMap.get(key) ??
+      ({
+        open: 0,
+        overdue: 0,
+        total: 0,
+        doneCount: 0,
+        doneOnTime: 0,
+        handlingTotal: 0,
+      } satisfies OwnerAgg);
     cur.total++;
     if (c.status !== "done") cur.open++;
     if (c.slaState === "breached") cur.overdue++;
+    if (c.status === "done") {
+      cur.doneCount++;
+      if (c.slaState === "ok") cur.doneOnTime++;
+      if (c.handlingMinutes != null) cur.handlingTotal += c.handlingMinutes;
+    }
     ownerMap.set(key, cur);
   }
   const byOwner = [...ownerMap.entries()]
-    .map(([owner, v]) => ({ owner, ...v }))
+    .map(([owner, v]) => ({
+      owner,
+      total: v.total,
+      open: v.open,
+      overdue: v.overdue,
+      slaScore: v.doneCount
+        ? Math.round((v.doneOnTime / v.doneCount) * 100)
+        : v.total - v.overdue > 0
+          ? Math.round(((v.total - v.overdue) / v.total) * 100)
+          : 0,
+      avgResolutionMinutes: v.doneCount
+        ? Math.round(v.handlingTotal / v.doneCount)
+        : 0,
+    }))
     .sort((a, b) => b.total - a.total);
 
   const dayBuckets = new Map<string, number>();

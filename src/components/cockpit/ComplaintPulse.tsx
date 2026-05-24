@@ -29,9 +29,11 @@ import type { ComplaintMetricsView } from "@/types/domain";
 export function ComplaintPulse({
   metrics,
   employees,
+  onOwnerClick,
 }: {
   metrics: ComplaintMetricsView | undefined | null;
   employees?: { id: string; name: string; avatarColor?: string }[];
+  onOwnerClick?: (ownerId: string) => void;
 }) {
   if (!metrics || metrics.total === 0) {
     return (
@@ -200,7 +202,15 @@ export function ComplaintPulse({
                   const color = emp?.avatarColor ?? "#12a9e8";
                   const maxTotal = topOwners[0].total;
                   return (
-                    <li key={o.owner} className="flex items-center gap-2.5">
+                    <li
+                      key={o.owner}
+                      onClick={() => onOwnerClick?.(o.owner)}
+                      className={cn(
+                        "flex items-center gap-2.5 rounded-lg p-1 -mx-1 transition-colors",
+                        onOwnerClick &&
+                          "hover:bg-bfresh-blue/[0.06] cursor-pointer",
+                      )}
+                    >
                       <span
                         className="grid size-7 shrink-0 place-items-center rounded-full text-[11px] font-black text-white ring-2 ring-white shadow-sm"
                         style={{ backgroundColor: color }}
@@ -226,13 +236,36 @@ export function ComplaintPulse({
                             className="from-bfresh-blue to-bfresh-fresh-green absolute inset-y-0 start-0 rounded-full bg-gradient-to-l"
                           />
                         </div>
-                        <div className="text-muted-foreground mt-0.5 flex items-center gap-2 text-[10px]">
-                          <span>פתוחות: <span className="font-bold tabular-nums">{o.open}</span></span>
+                        <div className="text-muted-foreground mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px]">
+                          <span>
+                            פתוחות:{" "}
+                            <span className="font-bold tabular-nums">
+                              {o.open}
+                            </span>
+                          </span>
                           {o.overdue > 0 && (
                             <span className="text-bfresh-coral font-bold">
-                              · חריגות: <span className="tabular-nums">{o.overdue}</span>
+                              · חריגות:{" "}
+                              <span className="tabular-nums">{o.overdue}</span>
                             </span>
                           )}
+                          <span
+                            className={cn(
+                              "ms-auto rounded-full px-1.5 py-0.5 text-[9.5px] font-black tabular-nums",
+                              o.slaScore >= 85
+                                ? "bg-bfresh-fresh-green/15 text-tone-success"
+                                : o.slaScore >= 70
+                                  ? "bg-tone-warm/15 text-tone-warm"
+                                  : "bg-bfresh-coral/15 text-bfresh-coral",
+                            )}
+                            title={
+                              o.avgResolutionMinutes
+                                ? `ממוצע טיפול: ${o.avgResolutionMinutes} ד'`
+                                : undefined
+                            }
+                          >
+                            SLA {o.slaScore}%
+                          </span>
                         </div>
                       </div>
                     </li>

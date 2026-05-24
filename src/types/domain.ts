@@ -206,7 +206,14 @@ export type ComplaintMetricsView = {
   inProgress: number;
   slaRisk: number;
   overdue: number;
-  byOwner: { owner: string; total: number; open: number; overdue: number }[];
+  byOwner: {
+    owner: string;
+    total: number;
+    open: number;
+    overdue: number;
+    slaScore: number;
+    avgResolutionMinutes: number;
+  }[];
   byStatus: { status: string; count: number }[];
   bySecondaryStatus: { status: string; count: number }[];
   trend30d: { date: string; count: number }[];
