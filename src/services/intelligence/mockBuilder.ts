@@ -13,6 +13,7 @@ import {
 } from "@/domain";
 import {
   computeBranchHealth,
+  computeComplaintMetrics,
   computeRegionalTrends,
   detectComplaintSpikes,
   detectEmployeeOverload,
@@ -170,6 +171,7 @@ export function buildMockSnapshot(seed: string = SEED_LABEL): IntelligenceSnapsh
     employeeOverload,
     regionalTrends,
     escalations,
+    complaintMetrics: computeComplaintMetrics(complaints),
     networkScore,
     networkScoreTrend: data.networkScoreTrend,
     audit: {

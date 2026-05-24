@@ -16,6 +16,7 @@ import {
 } from "@/domain";
 import type {
   BranchHealthEntry,
+  ComplaintMetrics,
   ComplaintSpike,
   EmployeeOverload,
   EscalationEvent,
@@ -525,3 +526,83 @@ export function generateInsights(args: {
 
   return out;
 }
+
+/* ─── Complaint metrics processor ─── */
+export function computeComplaintMetrics(
+  complaints: ComplaintEntity[],
+  now: Date = new Date(),
+): ComplaintMetrics {
+  const total = complaints.length;
+  const open = complaints.filter((c) => c.status !== "done").length;
+  const closed = complaints.filter((c) => c.status === "done").length;
+  const blocked = complaints.filter((c) => c.status === "blocked").length;
+  const inProgress = complaints.filter((c) => c.status === "in_progress").length;
+  const slaRisk = complaints.filter(
+    (c) => c.slaState === "at_risk" && c.status !== "done",
+  ).length;
+  const overdue = complaints.filter((c) => c.slaState === "breached").length;
+
+  const ownerMap = new Map<string, { open: number; overdue: number; total: number }>();
+  for (const c of complaints) {
+    const key = c.assigneeId ?? "unassigned";
+    const cur = ownerMap.get(key) ?? { open: 0, overdue: 0, total: 0 };
+    cur.total++;
+    if (c.status !== "done") cur.open++;
+    if (c.slaState === "breached") cur.overdue++;
+    ownerMap.set(key, cur);
+  }
+  const byOwner = [...ownerMap.entries()]
+    .map(([owner, v]) => ({ owner, ...v }))
+    .sort((a, b) => b.total - a.total);
+
+  const dayBuckets = new Map<string, number>();
+  for (const c of complaints) {
+    const key = c.createdAt.slice(0, 10);
+    dayBuckets.set(key, (dayBuckets.get(key) ?? 0) + 1);
+  }
+
+  const byDate = [...dayBuckets.entries()]
+    .map(([date, count]) => ({ date, count }))
+    .sort((a, b) => (a.date < b.date ? -1 : 1));
+
+  const trend30d: { date: string; count: number }[] = [];
+  for (let d = 29; d >= 0; d--) {
+    const day = new Date(now.getTime() - d * 86400000);
+    const key = day.toISOString().slice(0, 10);
+    trend30d.push({ date: key, count: dayBuckets.get(key) ?? 0 });
+  }
+
+  const statusMap = new Map<string, number>();
+  for (const c of complaints) {
+    statusMap.set(c.status, (statusMap.get(c.status) ?? 0) + 1);
+  }
+  const byStatus = [...statusMap.entries()].map(([status, count]) => ({
+    status,
+    count,
+  }));
+
+  const secondaryMap = new Map<string, number>();
+  for (const c of complaints) {
+    const k = c.secondaryStatus ?? "—";
+    secondaryMap.set(k, (secondaryMap.get(k) ?? 0) + 1);
+  }
+  const bySecondaryStatus = [...secondaryMap.entries()]
+    .map(([status, count]) => ({ status, count }))
+    .sort((a, b) => b.count - a.count);
+
+  return {
+    total,
+    open,
+    closed,
+    blocked,
+    inProgress,
+    slaRisk,
+    overdue,
+    byOwner,
+    byDate,
+    byStatus,
+    bySecondaryStatus,
+    trend30d,
+  };
+}
+

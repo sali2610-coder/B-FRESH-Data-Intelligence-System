@@ -134,15 +134,48 @@ function toComplaint(
   t: NormalizedTicket,
   b: MondayBoardConfig,
 ): ComplaintEntity {
+  const secondaryStatus = b.columns.secondaryStatus
+    ? (t.rawColumnValues[b.columns.secondaryStatus]?.text ?? null)
+    : null;
+  const phone = b.columns.phone
+    ? (t.rawColumnValues[b.columns.phone]?.text ?? null)
+    : null;
+  const notes = b.columns.notes
+    ? (t.rawColumnValues[b.columns.notes]?.text ?? null)
+    : null;
+  const attachmentCount = countAttachments(
+    b.columns.attachments
+      ? t.rawColumnValues[b.columns.attachments]?.value ?? null
+      : null,
+  );
   return {
     type: "complaint",
     ...baseTicketFields(t, b),
     category: t.category,
     subCategory: t.subCategory,
+    secondaryStatus,
     source: t.source,
     sentiment: null,
+    phone,
+    notes,
+    attachmentCount,
     provenance: provenance(t, b),
   };
+}
+
+function countAttachments(value: string | null): number {
+  if (!value) return 0;
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) return parsed.length;
+    if (parsed && typeof parsed === "object" && "files" in parsed) {
+      const files = (parsed as { files?: unknown[] }).files;
+      return Array.isArray(files) ? files.length : 0;
+    }
+  } catch {
+    /* ignore */
+  }
+  return 0;
 }
 
 function toMaintenance(

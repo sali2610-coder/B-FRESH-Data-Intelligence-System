@@ -94,22 +94,23 @@ class DispatchService implements MondayService {
 
   async getDashboard(): Promise<DashboardData> {
     const status = await resolved();
-    try {
-      const snapshot = await getSnapshot(status.source);
+    if (status.source === "live") {
+      // STRICT: live mode does NOT silently fall back to mock.
+      // Real data (possibly empty) is returned, or the error
+      // surfaces to the UI as an error state.
+      const snapshot = await getSnapshot("live");
       return renderDashboardData(snapshot);
-    } catch {
-      const snap = await getSnapshot("mock");
-      return renderDashboardData(snap);
     }
+    const snap = await getSnapshot("mock");
+    return renderDashboardData(snap);
   }
 
   async getSnapshot(): Promise<IntelligenceSnapshot> {
     const status = await resolved();
-    try {
-      return await getSnapshot(status.source);
-    } catch {
-      return getSnapshot("mock");
+    if (status.source === "live") {
+      return getSnapshot("live");
     }
+    return getSnapshot("mock");
   }
 
   async getBriefing(): Promise<ExecutiveBriefing> {

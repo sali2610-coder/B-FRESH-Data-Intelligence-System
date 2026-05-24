@@ -94,6 +94,27 @@ export type EscalationEvent = {
   severity: "critical" | "high" | "medium" | "low";
 };
 
+/** Aggregated complaint metrics — computed from ComplaintEntity[]. */
+export type ComplaintMetrics = {
+  total: number;
+  open: number;
+  closed: number;
+  blocked: number;
+  inProgress: number;
+  slaRisk: number; // at_risk count (still open)
+  overdue: number; // breached count
+  byOwner: {
+    owner: string;
+    total: number;
+    open: number;
+    overdue: number;
+  }[];
+  byDate: { date: string; count: number }[]; // 30d
+  byStatus: { status: string; count: number }[];
+  bySecondaryStatus: { status: string; count: number }[];
+  trend30d: { date: string; count: number }[];
+};
+
 /* ─── Audit metadata for the snapshot ─── */
 export type SnapshotAudit = {
   fetchedAt: string;
@@ -134,6 +155,9 @@ export type IntelligenceSnapshot = {
   employeeOverload: EmployeeOverload[];
   regionalTrends: RegionalTrend[];
   escalations: EscalationEvent[];
+
+  // Per-entity-type metrics
+  complaintMetrics: ComplaintMetrics;
 
   // Network-level KPIs
   networkScore: number;

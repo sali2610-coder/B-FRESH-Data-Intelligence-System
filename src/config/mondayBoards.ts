@@ -37,6 +37,8 @@ export type BoardDepartment =
 
 export type BoardColumnMap = {
   status?: string;
+  /** Secondary status (e.g. resolution status / sub-status). */
+  secondaryStatus?: string;
   priority?: string;
   branch?: string;
   region?: string;
@@ -47,12 +49,16 @@ export type BoardColumnMap = {
   source?: string;
   sla?: string;
   phone?: string;
+  /** Free-text notes / description column. */
+  notes?: string;
+  /** Files / attachments column. */
+  attachments?: string;
   supplier?: string;
   equipment?: string;
   cost?: string;
-  stage?: string; // for recruitment / franchise pipelines
-  score?: string; // for inspections
-  startAt?: string; // for campaigns
+  stage?: string; // recruitment / franchise pipelines
+  score?: string; // inspections
+  startAt?: string; // campaigns
   endAt?: string;
 };
 
@@ -127,9 +133,16 @@ export const MONDAY_BOARDS: MondayBoardConfig[] = [
     entityType: "complaint",
     description: "תלונות לקוחות נכנסות",
     columns: {
-      // Fill after inspecting /api/monday/board/1243625185
+      status: "status_Mjj38TB",
+      secondaryStatus: "status_mkk9trh0",
+      owner: "people",
+      dueDate: "date8",
+      phone: "phone_Mjj3idRr",
+      notes: "text_Mjj3DjR6",
+      attachments: "files",
+      // 'title' uses item.name natively — no column mapping needed
     },
-    enabled: false,
+    enabled: true,
   },
   {
     id: "2033091739",

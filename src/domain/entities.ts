@@ -78,8 +78,16 @@ export type ComplaintEntity = Auditable &
     type: "complaint";
     category: string | null;
     subCategory: string | null;
+    /** Secondary resolution status (e.g. "טופל" / "ממתין למענה"). */
+    secondaryStatus?: string | null;
     source: string | null; // whatsapp / web / phone / etc.
     sentiment?: "positive" | "neutral" | "negative" | null;
+    /** Customer phone — only populated when the column is mapped. */
+    phone?: string | null;
+    /** Free-text notes column content. */
+    notes?: string | null;
+    /** Count of attached files; URLs not exposed for privacy. */
+    attachmentCount?: number;
   };
 
 export type MaintenanceEntity = Auditable &

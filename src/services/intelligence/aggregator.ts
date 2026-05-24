@@ -6,6 +6,7 @@ import type { NormalizedTicket } from "@/lib/monday/types";
 import { deriveBranchFromTicket, deriveEmployee, mapToEntity } from "./mapper";
 import {
   computeBranchHealth,
+  computeComplaintMetrics,
   computeRegionalTrends,
   detectComplaintSpikes,
   detectEmployeeOverload,
@@ -160,6 +161,7 @@ export function buildSnapshot(
     employeeOverload,
     regionalTrends,
     escalations,
+    complaintMetrics: computeComplaintMetrics(complaints),
     networkScore,
     networkScoreTrend: 0,
     audit: {
