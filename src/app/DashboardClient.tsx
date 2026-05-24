@@ -31,6 +31,7 @@ import { SpotlightCards } from "@/components/cockpit/SpotlightCards";
 import { AICopilotRail } from "@/components/cockpit/AICopilotRail";
 import { LiveTicker } from "@/components/cockpit/LiveTicker";
 import { NarrativeBar } from "@/components/cockpit/NarrativeBar";
+import { ComplaintPulse } from "@/components/cockpit/ComplaintPulse";
 import { useEffect } from "react";
 import {
   areaOption,
@@ -117,6 +118,14 @@ export default function DashboardClient() {
             branches={data.branchHealth}
             networkScore={data.networkScore}
             networkTrend={data.networkScoreTrend}
+          />
+        )}
+
+        {/* ── Band 4.5: Complaint pulse (live complaints surface) ── */}
+        {data?.complaintMetrics && (
+          <ComplaintPulse
+            metrics={data.complaintMetrics}
+            employees={data.employees}
           />
         )}
 

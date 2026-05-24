@@ -193,6 +193,25 @@ export type BranchProfile = {
   similarBranches: BranchHealth[];
 };
 
+/**
+ * Surface-friendly slice of the IntelligenceSnapshot.complaintMetrics.
+ * The full structured metric lives in the snapshot; DashboardData carries
+ * what the UI bands need.
+ */
+export type ComplaintMetricsView = {
+  total: number;
+  open: number;
+  closed: number;
+  blocked: number;
+  inProgress: number;
+  slaRisk: number;
+  overdue: number;
+  byOwner: { owner: string; total: number; open: number; overdue: number }[];
+  byStatus: { status: string; count: number }[];
+  bySecondaryStatus: { status: string; count: number }[];
+  trend30d: { date: string; count: number }[];
+};
+
 export type DashboardData = {
   kpis: KpiSnapshot;
   tasksOverTime: TimeSeriesPoint[];
@@ -211,4 +230,5 @@ export type DashboardData = {
   activity: ActivityEvent[];
   networkScore: number;
   networkScoreTrend: number; // % vs previous period
+  complaintMetrics?: ComplaintMetricsView;
 };

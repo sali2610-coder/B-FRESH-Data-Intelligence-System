@@ -296,6 +296,21 @@ export function renderDashboardData(
     activity,
     networkScore: snapshot.networkScore,
     networkScoreTrend: snapshot.networkScoreTrend,
+    complaintMetrics: snapshot.complaintMetrics
+      ? {
+          total: snapshot.complaintMetrics.total,
+          open: snapshot.complaintMetrics.open,
+          closed: snapshot.complaintMetrics.closed,
+          blocked: snapshot.complaintMetrics.blocked,
+          inProgress: snapshot.complaintMetrics.inProgress,
+          slaRisk: snapshot.complaintMetrics.slaRisk,
+          overdue: snapshot.complaintMetrics.overdue,
+          byOwner: snapshot.complaintMetrics.byOwner,
+          byStatus: snapshot.complaintMetrics.byStatus,
+          bySecondaryStatus: snapshot.complaintMetrics.bySecondaryStatus,
+          trend30d: snapshot.complaintMetrics.trend30d,
+        }
+      : undefined,
   };
 }
 
