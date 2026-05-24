@@ -49,9 +49,9 @@ export function TasksTable({
   employees,
   onRowClick,
 }: {
-  tasks: Task[];
-  branches: Branch[];
-  employees: Employee[];
+  tasks: Task[] | null | undefined;
+  branches: Branch[] | null | undefined;
+  employees: Employee[] | null | undefined;
   onRowClick?: (task: Task) => void;
 }) {
   const [sorting, setSorting] = useState<SortingState>([
@@ -60,14 +60,19 @@ export function TasksTable({
   const density = useUI((s) => s.density);
   const compact = density === "compact";
   const rowPad = compact ? "py-2" : "py-3";
+  const taskList = Array.isArray(tasks) ? tasks.filter(Boolean) : [];
+  const branchList = Array.isArray(branches) ? branches.filter(Boolean) : [];
+  const employeeList = Array.isArray(employees)
+    ? employees.filter(Boolean)
+    : [];
 
   const branchMap = useMemo(
-    () => Object.fromEntries(branches.map((b) => [b.id, b])),
-    [branches],
+    () => Object.fromEntries(branchList.map((b) => [b.id, b])),
+    [branchList],
   );
   const empMap = useMemo(
-    () => Object.fromEntries(employees.map((e) => [e.id, e])),
-    [employees],
+    () => Object.fromEntries(employeeList.map((e) => [e.id, e])),
+    [employeeList],
   );
 
   const columns = useMemo<ColumnDef<Task>[]>(
@@ -167,7 +172,7 @@ export function TasksTable({
   );
 
   const table = useReactTable({
-    data: tasks,
+    data: taskList,
     columns,
     state: { sorting },
     onSortingChange: setSorting,

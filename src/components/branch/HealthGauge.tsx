@@ -2,7 +2,8 @@
 
 import { motion } from "framer-motion";
 import NumberFlow from "@number-flow/react";
-import { scoreColor, STATUS_LABEL, STATUS_TONE } from "@/lib/health";
+import { scoreColor } from "@/lib/health";
+import { getStatusLabel, getStatusTone } from "@/lib/safe";
 import { cn } from "@/lib/utils";
 import type { BranchStatus } from "@/types/domain";
 
@@ -17,10 +18,12 @@ export function HealthGauge({
 }) {
   const r = 64;
   const c = 2 * Math.PI * r;
-  const pct = Math.max(0, Math.min(100, score));
+  const safeScore =
+    typeof score === "number" && Number.isFinite(score) ? score : 0;
+  const pct = Math.max(0, Math.min(100, safeScore));
   const offset = c * (1 - pct / 100);
-  const color = scoreColor(score);
-  const tone = STATUS_TONE[status];
+  const color = scoreColor(safeScore);
+  const tone = getStatusTone(status);
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
@@ -66,7 +69,7 @@ export function HealthGauge({
         <div className="flex flex-col items-center gap-1">
           <div className="text-4xl font-black leading-none tabular-nums">
             <NumberFlow
-              value={score}
+              value={safeScore}
               locales="he-IL"
               spinTiming={{
                 duration: 900,
@@ -80,7 +83,7 @@ export function HealthGauge({
               tone.chip,
             )}
           >
-            {STATUS_LABEL[status]}
+            {getStatusLabel(status)}
           </div>
         </div>
       </div>

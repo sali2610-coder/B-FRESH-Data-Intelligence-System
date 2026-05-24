@@ -39,9 +39,14 @@ const SEV_LABEL: Record<string, string> = {
   medium: "בינוני",
 };
 
-export function UrgentAlertsRail({ events }: { events: ActivityEvent[] }) {
-  const urgent = events.filter(
-    (e) => e.severity === "critical" || e.severity === "high",
+export function UrgentAlertsRail({
+  events,
+}: {
+  events: ActivityEvent[] | null | undefined;
+}) {
+  const list = Array.isArray(events) ? events : [];
+  const urgent = list.filter(
+    (e) => e && (e.severity === "critical" || e.severity === "high"),
   );
   if (urgent.length === 0) return null;
 

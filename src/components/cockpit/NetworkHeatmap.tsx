@@ -7,6 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { STATUS_LABEL, STATUS_TONE } from "@/lib/health";
+import {
+  getBranchStatus,
+  getStatusLabel,
+  getStatusTone,
+  safeArray,
+  safeNumber,
+  safeText,
+} from "@/lib/safe";
 import { SPRING_SMOOTH, enterUp } from "@/lib/motion";
 import type { BranchHealth } from "@/types/domain";
 
@@ -19,14 +27,19 @@ const REGION_LABEL: Record<string, string> = {
 export function NetworkHeatmap({
   branches,
 }: {
-  branches: BranchHealth[];
+  branches: BranchHealth[] | null | undefined;
 }) {
-  const sorted = [...branches].sort((a, b) => b.score - a.score);
+  const safeBranches = safeArray(branches).filter(
+    (b) => b && typeof b === "object",
+  );
+  const sorted = [...safeBranches].sort(
+    (a, b) => safeNumber(b.score) - safeNumber(a.score),
+  );
   const byStatus = {
-    excellent: branches.filter((b) => b.status === "excellent").length,
-    stable: branches.filter((b) => b.status === "stable").length,
-    attention: branches.filter((b) => b.status === "attention").length,
-    critical: branches.filter((b) => b.status === "critical").length,
+    excellent: safeBranches.filter((b) => getBranchStatus(b) === "excellent").length,
+    stable: safeBranches.filter((b) => getBranchStatus(b) === "stable").length,
+    attention: safeBranches.filter((b) => getBranchStatus(b) === "attention").length,
+    critical: safeBranches.filter((b) => getBranchStatus(b) === "critical").length,
   };
 
   return (
@@ -60,7 +73,7 @@ export function NetworkHeatmap({
           </div>
           <div>
             <CardTitle className="text-base font-bold tracking-tight">
-              היטמפ הרשת · {branches.length} סניפים
+              היטמפ הרשת · {safeBranches.length} סניפים
             </CardTitle>
             <p className="text-muted-foreground text-xs">
               סטטוס תפעולי לפי ציון בריאות
@@ -89,11 +102,24 @@ export function NetworkHeatmap({
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 xl:grid-cols-4">
+          {sorted.length === 0 && (
+            <div className="text-muted-foreground col-span-full rounded-2xl border border-dashed border-border/60 p-8 text-center text-sm">
+              אין נתוני סניפים זמינים עדיין · ממתין לעמודת סניף ב-Monday
+            </div>
+          )}
           {sorted.map((b, i) => {
-            const tone = STATUS_TONE[b.status];
+            const status = getBranchStatus(b);
+            const tone = getStatusTone(status);
+            const branchId = safeText(b?.branchId, "");
+            const branchName = safeText(b?.branchName);
+            const region = b?.region ?? "center";
+            const manager = safeText(b?.manager);
+            const score = safeNumber(b?.score);
+            const trend = safeNumber(b?.trend);
+            const movement = safeNumber(b?.movement);
             return (
               <motion.div
-                key={b.branchId}
+                key={branchId || i}
                 variants={enterUp(i)}
                 initial="hidden"
                 animate="visible"
@@ -101,14 +127,14 @@ export function NetworkHeatmap({
                 transition={SPRING_SMOOTH}
               >
                 <Link
-                  href={`/branches/${b.branchId}`}
+                  href={branchId ? `/branches/${branchId}` : "#"}
                   className={cn(
                     "premium-card group relative block overflow-hidden p-3 transition-shadow",
-                    b.status === "excellent"
+                    status === "excellent"
                       ? "glow-success"
-                      : b.status === "stable"
+                      : status === "stable"
                         ? "glow-network"
-                        : b.status === "attention"
+                        : status === "attention"
                           ? "glow-amber"
                           : "glow-critical",
                   )}
@@ -116,16 +142,16 @@ export function NetworkHeatmap({
                   <span
                     className={cn(
                       "pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-l",
-                      b.status === "excellent"
+                      status === "excellent"
                         ? "from-bfresh-fresh-green to-bfresh-light-blue"
-                        : b.status === "stable"
+                        : status === "stable"
                           ? "from-bfresh-blue to-bfresh-light-blue"
-                          : b.status === "attention"
+                          : status === "attention"
                             ? "from-tone-warm to-tone-sla"
                             : "from-bfresh-coral to-bfresh-coral-deep",
                     )}
                   />
-                  {b.status === "critical" && (
+                  {status === "critical" && (
                     <motion.span
                       animate={{ opacity: [0.4, 0.85, 0.4] }}
                       transition={{ duration: 2.2, repeat: Infinity }}
@@ -135,24 +161,24 @@ export function NetworkHeatmap({
                   <div className="relative flex items-start justify-between">
                     <div className="min-w-0">
                       <div className="truncate text-sm font-bold">
-                        {b.branchName}
+                        {branchName}
                       </div>
                       <div className="text-muted-foreground text-[10.5px] font-medium">
-                        {REGION_LABEL[b.region]} · {b.manager}
+                        {REGION_LABEL[region] ?? "—"} · {manager}
                       </div>
                     </div>
                     <span
                       className={cn(
                         "size-2 shrink-0 rounded-full",
                         tone.dot,
-                        b.status === "critical" && "animate-pulse",
+                        status === "critical" && "animate-pulse",
                       )}
                     />
                   </div>
                   <div className="relative mt-3 flex items-end justify-between">
                     <div>
                       <div className="text-[26px] font-black leading-none tabular-nums">
-                        {b.score}
+                        {score || "—"}
                       </div>
                       <div className="text-muted-foreground text-[10px] font-bold uppercase tracking-wider">
                         ציון
@@ -165,31 +191,31 @@ export function NetworkHeatmap({
                           tone.chip,
                         )}
                       >
-                        {STATUS_LABEL[b.status]}
+                        {getStatusLabel(status)}
                       </span>
                       <span
                         className={cn(
                           "inline-flex items-center gap-0.5 text-[10px] font-bold tabular-nums",
-                          b.trend >= 0
+                          trend >= 0
                             ? "text-tone-success"
                             : "text-bfresh-coral",
                         )}
                       >
-                        {b.trend >= 0 ? "▲" : "▼"} {Math.abs(b.trend)}%
+                        {trend >= 0 ? "▲" : "▼"} {Math.abs(trend)}%
                       </span>
                     </div>
                   </div>
-                  {b.movement !== 0 && (
+                  {movement !== 0 && (
                     <div className="text-muted-foreground relative mt-1.5 flex items-center gap-1 text-[10px]">
                       <span
                         className={cn(
                           "inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 font-black tabular-nums",
-                          b.movement > 0
+                          movement > 0
                             ? "bg-bfresh-fresh-green/10 text-tone-success"
                             : "bg-bfresh-coral/10 text-bfresh-coral",
                         )}
                       >
-                        {b.movement > 0 ? "▲" : "▼"} {Math.abs(b.movement)}
+                        {movement > 0 ? "▲" : "▼"} {Math.abs(movement)}
                       </span>
                       <span>בדירוג</span>
                     </div>

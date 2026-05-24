@@ -37,13 +37,18 @@ const SEV_META = {
 
 const SEV_RANK = { high: 0, medium: 1, low: 2 } as const;
 
-export function SLAAlerts({ alerts }: { alerts: SLAAlert[] }) {
-  const sorted = [...alerts].sort(
+export function SLAAlerts({
+  alerts,
+}: {
+  alerts: SLAAlert[] | null | undefined;
+}) {
+  const list = Array.isArray(alerts) ? alerts.filter(Boolean) : [];
+  const sorted = [...list].sort(
     (a, b) =>
       SEV_RANK[a.severity] - SEV_RANK[b.severity] ||
       b.minutesOverdue - a.minutesOverdue,
   );
-  const high = alerts.filter((a) => a.severity === "high").length;
+  const high = list.filter((a) => a.severity === "high").length;
 
   return (
     <Card className="premium-card flex h-full flex-col overflow-hidden border-0 bg-transparent shadow-none">

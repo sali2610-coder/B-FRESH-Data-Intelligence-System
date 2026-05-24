@@ -37,18 +37,27 @@ export function statusFromScore(score: number): BranchStatus {
   return "critical";
 }
 
-export const STATUS_LABEL: Record<BranchStatus, string> = {
+export const STATUS_LABEL: Record<BranchStatus | "unknown", string> = {
   excellent: "מצוין",
   stable: "יציב",
   attention: "דורש תשומת לב",
   critical: "קריטי",
+  unknown: "לא ידוע",
 };
 
-// B-FRESH brand status tones — coral/aqua/green/coral progression
+// B-FRESH brand status tones — coral/aqua/green/coral progression.
+// Includes `unknown` for graceful fallback when live data has no health yet.
 export const STATUS_TONE: Record<
-  BranchStatus,
+  BranchStatus | "unknown",
   { fg: string; bg: string; border: string; chip: string; dot: string }
 > = {
+  unknown: {
+    fg: "text-muted-foreground",
+    bg: "bg-muted/40",
+    border: "border-border/60",
+    chip: "bg-muted/40 text-muted-foreground border-border/60",
+    dot: "bg-muted-foreground/40",
+  },
   excellent: {
     fg: "text-tone-success",
     bg: "bg-bfresh-fresh-green/10",

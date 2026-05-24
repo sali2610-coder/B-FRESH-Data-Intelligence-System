@@ -52,16 +52,21 @@ const KIND_META = {
 
 const IMP_RANK = { high: 0, medium: 1, low: 2 } as const;
 
-export function AICopilotRail({ insights }: { insights: AIInsight[] }) {
+export function AICopilotRail({
+  insights,
+}: {
+  insights: AIInsight[] | null | undefined;
+}) {
+  const list = Array.isArray(insights) ? insights.filter(Boolean) : [];
   return (
     <>
       {/* Desktop sticky rail */}
       <aside className="sticky top-[88px] hidden h-[calc(100vh-104px)] xl:block">
-        <CopilotInner insights={insights} />
+        <CopilotInner insights={list} />
       </aside>
 
       {/* Mobile + tablet FAB → Sheet */}
-      <CopilotFab insights={insights} />
+      <CopilotFab insights={list} />
     </>
   );
 }

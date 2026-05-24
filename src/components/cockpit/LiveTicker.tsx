@@ -21,14 +21,19 @@ const SEV_TONE: Record<string, string> = {
   info: "text-muted-foreground",
 };
 
-export function LiveTicker({ events }: { events: ActivityEvent[] }) {
-  // Show only newsworthy items (critical + high + maintenance + franchise leads)
-  const items = events.filter(
+export function LiveTicker({
+  events,
+}: {
+  events: ActivityEvent[] | null | undefined;
+}) {
+  const list = Array.isArray(events) ? events : [];
+  const items = list.filter(
     (e) =>
-      e.severity === "critical" ||
-      e.severity === "high" ||
-      e.kind === "franchise_lead" ||
-      e.kind === "maintenance_call",
+      e &&
+      (e.severity === "critical" ||
+        e.severity === "high" ||
+        e.kind === "franchise_lead" ||
+        e.kind === "maintenance_call"),
   );
   if (items.length === 0) return null;
 

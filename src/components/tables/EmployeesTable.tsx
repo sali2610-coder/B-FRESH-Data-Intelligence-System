@@ -10,7 +10,12 @@ import { fmtDuration, fmtNumber } from "@/lib/format";
 import { useUI } from "@/lib/stores/ui";
 import type { EmployeePerformance } from "@/types/domain";
 
-export function EmployeesTable({ rows }: { rows: EmployeePerformance[] }) {
+export function EmployeesTable({
+  rows,
+}: {
+  rows: EmployeePerformance[] | null | undefined;
+}) {
+  rows = Array.isArray(rows) ? rows.filter(Boolean) : [];
   const density = useUI((s) => s.density);
   const compact = density === "compact";
   const maxDone = Math.max(...rows.map((r) => r.done), 1);

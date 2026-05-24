@@ -93,15 +93,16 @@ export function ActivityFeed({
   events,
   height = 540,
 }: {
-  events: ActivityEvent[];
+  events: ActivityEvent[] | null | undefined;
   height?: number;
 }) {
+  const list = Array.isArray(events) ? events.filter(Boolean) : [];
   // group by day-bucket
   const buckets: { label: string; items: ActivityEvent[] }[] = [];
   const todayKey = new Date().toDateString();
   const yesterdayKey = new Date(Date.now() - 86400000).toDateString();
   const map = new Map<string, ActivityEvent[]>();
-  events.forEach((e) => {
+  list.forEach((e) => {
     const dKey = new Date(e.occurredAt).toDateString();
     const label =
       dKey === todayKey
